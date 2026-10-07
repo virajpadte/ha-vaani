@@ -1,7 +1,7 @@
 {
   "domain": "vaani",
   "name": "Vaani",
-  "version": "0.1.81",
+  "version": "1.0.0",
   "codeowners": ["@virajpadte"],
   "config_flow": true,
   "dependencies": ["ai_task", "conversation", "frontend", "lovelace", "stt", "tts"],

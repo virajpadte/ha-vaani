@@ -1,7 +1,7 @@
 """Constants for Vaani."""
 
 DOMAIN = "vaani"
-VERSION = "0.1.81"
+VERSION = "1.0.0"
 CONF_URL = "url"
 CONF_TOKEN = "token"
 CONF_FLOW_ID = "flow_id"
