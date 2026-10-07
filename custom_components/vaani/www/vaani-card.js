@@ -39,7 +39,7 @@ const CARD_TRANSLATIONS = {
     waitingForMicrophone: "Waiting for microphone permission",
     microphoneUnavailable: "Microphone access is not available from this browser context.",
     microphoneBlocked: "Microphone access is blocked. Allow microphone access and retry.",
-    connectedDetail: "Connected. Speak to Sarvam Assist.",
+    connectedDetail: "Connected. Speak to Vaani.",
     connectingAudio: "Connecting audio",
   },
   pl: {
@@ -55,7 +55,7 @@ const CARD_TRANSLATIONS = {
     waitingForMicrophone: "Oczekiwanie na zgodę użycia mikrofonu",
     microphoneUnavailable: "Dostęp do mikrofonu nie jest dostępny w tej przeglądarce.",
     microphoneBlocked: "Dostęp do mikrofonu jest zablokowany. Zezwól na mikrofon i spróbuj ponownie.",
-    connectedDetail: "Połączono. Powiedz coś do Sarvam Assist.",
+    connectedDetail: "Połączono. Powiedz coś do Vaani.",
     connectingAudio: "Łączenie audio",
   },
 };
@@ -412,14 +412,14 @@ function preferFullbandOpus(sdp) {
   }).join(separator);
 }
 
-class SarvamAssistCard extends HTMLElement {
+class VaaniCard extends HTMLElement {
   constructor() {
     super();
     this.stopOnPageExit = () => this.stop();
   }
 
   static getStubConfig() {
-    return { name: "Sarvam Assist" };
+    return { name: "Vaani" };
   }
 
   connectedCallback() {
@@ -879,7 +879,7 @@ class SarvamAssistCard extends HTMLElement {
 
   async loadAddonConfig() {
     const path = this.proxyMode()
-      ? `/api/sarvam_assist/config${this.entryQuery()}`
+      ? `/api/vaani/config${this.entryQuery()}`
       : "/api/assist/config";
     const response = await fetch(this.apiUrl(path), { headers: this.authHeaders() });
     if (!response.ok) throw new Error(`Config failed with HTTP ${response.status}`);
@@ -914,7 +914,7 @@ class SarvamAssistCard extends HTMLElement {
   }
 
   clientId() {
-    const key = "sarvam-assist-lovelace-client-id";
+    const key = "vaani-lovelace-client-id";
     const existing = localStorage.getItem(key);
     if (existing) return existing;
     const created = crypto.randomUUID();
@@ -1354,7 +1354,7 @@ class SarvamAssistCard extends HTMLElement {
           data: {
             version: "1.4.0",
             about: {
-              library: "sarvam-assist-lovelace-card",
+              library: "vaani-lovelace-card",
               library_version: SARVAM_ASSIST_CARD_VERSION,
               platform: "home-assistant",
             },
@@ -1391,7 +1391,7 @@ class SarvamAssistCard extends HTMLElement {
       await this.waitForIce(peer);
 
       const offerPath = this.proxyMode()
-        ? `/api/sarvam_assist/offer${this.entryQuery()}`
+        ? `/api/vaani/offer${this.entryQuery()}`
         : addonConfig.runner_offer_path || "api/offer";
       const requestData = {
         source: "lovelace_card",
@@ -1947,7 +1947,7 @@ class SarvamAssistCard extends HTMLElement {
         <div class="${compact ? "wrap compact" : "wrap"}">
           <div class="head">
             <div class="title">
-              <h3>${this.config.name || "Sarvam Assist"}</h3>
+              <h3>${this.config.name || "Vaani"}</h3>
               <span class="status-pill ${statusClass}">${escapeHtml(statusLabel)}</span>
             </div>
             <div class="actions">
@@ -1985,36 +1985,36 @@ class SarvamAssistCard extends HTMLElement {
   }
 }
 
-function patchSarvamAssistCard(existingCard) {
-  for (const name of Object.getOwnPropertyNames(SarvamAssistCard.prototype)) {
+function patchVaaniCard(existingCard) {
+  for (const name of Object.getOwnPropertyNames(VaaniCard.prototype)) {
     if (name === "constructor") continue;
     Object.defineProperty(
       existingCard.prototype,
       name,
-      Object.getOwnPropertyDescriptor(SarvamAssistCard.prototype, name),
+      Object.getOwnPropertyDescriptor(VaaniCard.prototype, name),
     );
   }
-  existingCard.getStubConfig = SarvamAssistCard.getStubConfig;
+  existingCard.getStubConfig = VaaniCard.getStubConfig;
   existingCard.__sarvamAssistVersion = SARVAM_ASSIST_CARD_VERSION;
 }
 
-function collectSarvamAssistCards(root, cards = new Set(), seen = new Set()) {
+function collectVaaniCards(root, cards = new Set(), seen = new Set()) {
   if (!root || seen.has(root)) return cards;
   seen.add(root);
-  if (root.localName === "sarvam-assist-card") cards.add(root);
+  if (root.localName === "vaani-card") cards.add(root);
   if (!root.querySelectorAll) return cards;
 
-  root.querySelectorAll("sarvam-assist-card").forEach((card) => cards.add(card));
+  root.querySelectorAll("vaani-card").forEach((card) => cards.add(card));
   root.querySelectorAll("*").forEach((element) => {
-    if (element.shadowRoot) collectSarvamAssistCards(element.shadowRoot, cards, seen);
+    if (element.shadowRoot) collectVaaniCards(element.shadowRoot, cards, seen);
   });
   return cards;
 }
 
-function refreshSarvamAssistCard(card) {
+function refreshVaaniCard(card) {
   if (!card || card.__sarvamAssistVersion === SARVAM_ASSIST_CARD_VERSION) return;
   card.__sarvamAssistVersion = SARVAM_ASSIST_CARD_VERSION;
-  card.config = card.config || { name: "Sarvam Assist" };
+  card.config = card.config || { name: "Vaani" };
   card.state = card.state || "idle";
   card.detail = card.detail || card.t?.("ready") || "Ready";
   card.userTranscript = card.userTranscript || "";
@@ -2053,11 +2053,11 @@ function refreshSarvamAssistCard(card) {
   if (typeof card.render === "function") card.render();
 }
 
-function refreshSarvamAssistCards() {
-  collectSarvamAssistCards(document).forEach(refreshSarvamAssistCard);
+function refreshVaaniCards() {
+  collectVaaniCards(document).forEach(refreshVaaniCard);
 }
 
-function installSarvamAssistCardRefresher() {
+function installVaaniCardRefresher() {
   if (window.__sarvamAssistCardRefresherInstalled) return;
   window.__sarvamAssistCardRefresherInstalled = true;
   let pending = false;
@@ -2081,7 +2081,7 @@ function installSarvamAssistCardRefresher() {
     requestAnimationFrame(() => {
       pending = false;
       observeRoots(document);
-      refreshSarvamAssistCards();
+      refreshVaaniCards();
     });
   };
   observer = new MutationObserver(schedule);
@@ -2089,21 +2089,21 @@ function installSarvamAssistCardRefresher() {
   [0, 250, 1000, 3000].forEach((delay) => setTimeout(schedule, delay));
 }
 
-const existingSarvamAssistCard = customElements.get("sarvam-assist-card");
-if (existingSarvamAssistCard) {
-  patchSarvamAssistCard(existingSarvamAssistCard);
+const existingVaaniCard = customElements.get("vaani-card");
+if (existingVaaniCard) {
+  patchVaaniCard(existingVaaniCard);
 } else {
-  customElements.define("sarvam-assist-card", SarvamAssistCard);
+  customElements.define("vaani-card", VaaniCard);
 }
-installSarvamAssistCardRefresher();
-refreshSarvamAssistCards();
+installVaaniCardRefresher();
+refreshVaaniCards();
 
 window.customCards = Array.isArray(window.customCards) ? window.customCards : [];
-const existingCardIndex = window.customCards.findIndex((card) => card.type === "sarvam-assist-card");
+const existingCardIndex = window.customCards.findIndex((card) => card.type === "vaani-card");
 if (existingCardIndex >= 0) window.customCards.splice(existingCardIndex, 1);
 window.customCards.push({
-  type: "sarvam-assist-card",
-  name: "Sarvam Assist",
-  description: "Realtime Sarvam Assist voice card.",
+  type: "vaani-card",
+  name: "Vaani",
+  description: "Realtime Vaani voice card.",
   preview: true,
 });

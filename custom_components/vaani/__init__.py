@@ -1,4 +1,4 @@
-"""Sarvam Assist custom integration."""
+"""Vaani custom integration."""
 
 from __future__ import annotations
 
@@ -14,22 +14,25 @@ from .views import register_proxy_views
 PLATFORMS = [Platform.CONVERSATION, Platform.STT, Platform.TTS]
 if hasattr(Platform, "AI_TASK"):
     PLATFORMS.append(Platform.AI_TASK)
-CARD_RESOURCE_PATH = "/sarvam_assist/sarvam-assist-card.js"
+CARD_RESOURCE_PATH = "/vaani/vaani-card.js"
 CARD_MODULE_URL = f"{CARD_RESOURCE_PATH}?v={VERSION}"
-_LEGACY_CARD_RESOURCE_PATH = "/pipecat_assist/pipecat-assist-card.js"
+_LEGACY_CARD_RESOURCE_PATHS = (
+    "/sarvam_assist/sarvam-assist-card.js",
+    "/pipecat_assist/pipecat-assist-card.js",
+)
 
 
 def _is_card_resource_url(url: str) -> bool:
-    """Return true for old or current Sarvam Assist Lovelace card resources."""
+    """Return true for old or current Vaani Lovelace card resources."""
 
     path = url.split("?")[0]
-    return path in (CARD_RESOURCE_PATH, _LEGACY_CARD_RESOURCE_PATH) or path.endswith(
-        ("/sarvam-assist-card.js", "/pipecat-assist-card.js")
+    return path in (CARD_RESOURCE_PATH, *_LEGACY_CARD_RESOURCE_PATHS) or path.endswith(
+        ("/vaani-card.js", "/sarvam-assist-card.js", "/pipecat-assist-card.js")
     )
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Sarvam Assist from a config entry."""
+    """Set up Vaani from a config entry."""
 
     await _async_register_static_path(hass)
     register_proxy_views(hass)
@@ -40,7 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload Sarvam Assist."""
+    """Unload Vaani."""
 
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unloaded:
@@ -118,7 +121,7 @@ async def _async_register_static_path(hass: HomeAssistant) -> None:
     """Expose Lovelace card assets from the integration."""
 
     www_path = Path(__file__).parent / "www"
-    route = "/sarvam_assist"
+    route = "/vaani"
     try:
         from homeassistant.components.http import StaticPathConfig
     except ImportError:

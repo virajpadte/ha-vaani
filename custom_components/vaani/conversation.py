@@ -1,4 +1,4 @@
-"""Home Assistant Conversation entity for Sarvam Assist."""
+"""Home Assistant Conversation entity for Vaani."""
 
 from __future__ import annotations
 
@@ -31,16 +31,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Sarvam Assist conversation entity."""
+    """Set up the Vaani conversation entity."""
 
-    async_add_entities([SarvamAssistConversationEntity(hass, entry)])
+    async_add_entities([VaaniConversationEntity(hass, entry)])
 
 
-class SarvamAssistConversationEntity(conversation.ConversationEntity):
-    """Conversation entity backed by the Sarvam Assist add-on."""
+class VaaniConversationEntity(conversation.ConversationEntity):
+    """Conversation entity backed by the Vaani add-on."""
 
     _attr_has_entity_name = True
-    _attr_name = "Sarvam Assist"
+    _attr_name = "Vaani"
     _attr_supported_features = conversation.ConversationEntityFeature.CONTROL
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -86,7 +86,7 @@ class SarvamAssistConversationEntity(conversation.ConversationEntity):
                         had_error = True
                         response.async_set_error(
                             intent.IntentResponseErrorCode.UNKNOWN,
-                            data.get("detail", "Sarvam Assist returned an error."),
+                            data.get("detail", "Vaani returned an error."),
                         )
                     elif data.get("error"):
                         had_error = True
@@ -100,7 +100,7 @@ class SarvamAssistConversationEntity(conversation.ConversationEntity):
             had_error = True
             response.async_set_error(
                 intent.IntentResponseErrorCode.UNKNOWN,
-                f"Sarvam Assist is not reachable: {err}",
+                f"Vaani is not reachable: {err}",
             )
             data = {}
 

@@ -1,4 +1,4 @@
-"""AI Task entity for Sarvam Assist."""
+"""AI Task entity for Vaani."""
 
 from __future__ import annotations
 
@@ -60,16 +60,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Sarvam Assist AI Tasks."""
+    """Set up Vaani AI Tasks."""
 
-    async_add_entities([SarvamAssistAITaskEntity(hass, entry)])
+    async_add_entities([VaaniAITaskEntity(hass, entry)])
 
 
-class SarvamAssistAITaskEntity(ai_task.AITaskEntity):
-    """AI Task entity backed by the Sarvam Assist add-on."""
+class VaaniAITaskEntity(ai_task.AITaskEntity):
+    """AI Task entity backed by the Vaani add-on."""
 
     _attr_has_entity_name = True
-    _attr_name = "Sarvam Assist"
+    _attr_name = "Vaani"
     _attr_supported_features = SUPPORTED_FEATURES
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -110,10 +110,10 @@ class SarvamAssistAITaskEntity(ai_task.AITaskEntity):
                 data = await _response_payload(response)
                 if response.status >= 400:
                     raise HomeAssistantError(
-                        data.get("detail") or "Sarvam Assist AI Task failed"
+                        data.get("detail") or "Vaani AI Task failed"
                     )
         except aiohttp.ClientError as err:
-            raise HomeAssistantError(f"Sarvam Assist is not reachable: {err}") from err
+            raise HomeAssistantError(f"Vaani is not reachable: {err}") from err
 
         return ai_task.GenDataTaskResult(
             conversation_id=data.get("conversation_id") or chat_log.conversation_id,
@@ -150,17 +150,17 @@ class SarvamAssistAITaskEntity(ai_task.AITaskEntity):
                 data = await _response_payload(response)
                 if response.status >= 400:
                     raise HomeAssistantError(
-                        data.get("detail") or "Sarvam Assist image generation failed"
+                        data.get("detail") or "Vaani image generation failed"
                     )
         except aiohttp.ClientError as err:
-            raise HomeAssistantError(f"Sarvam Assist is not reachable: {err}") from err
+            raise HomeAssistantError(f"Vaani is not reachable: {err}") from err
 
         try:
             image_data = base64.b64decode(str(data.get("image_base64") or ""), validate=True)
         except (binascii.Error, ValueError) as err:
-            raise HomeAssistantError("Sarvam Assist returned invalid image data") from err
+            raise HomeAssistantError("Vaani returned invalid image data") from err
         if not image_data:
-            raise HomeAssistantError("Sarvam Assist returned an empty image")
+            raise HomeAssistantError("Vaani returned an empty image")
 
         return ai_task.GenImageTaskResult(
             conversation_id=data.get("conversation_id") or chat_log.conversation_id,

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="addons/pipecat_assist/logo.png" alt="Sarvam Assist" width="320">
+  <img src="addons/pipecat_assist/logo.png" alt="Vaani" width="320">
 </p>
 
-# Sarvam Assist
+# Vaani
 
 <p align="center">
   <a href="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/ci.yml">
@@ -22,7 +22,7 @@
   </a>
 </p>
 
-Sarvam Assist is a slim, Indic-language voice assistant for
+Vaani is a slim, Indic-language voice assistant for
 Home Assistant, built on [Sarvam AI](https://www.sarvam.ai/)'s speech and
 language models. It is a focused fork of the original multi-provider
 [Pipecat Assist](https://github.com/kyvaith/pipecat-homeassistant) project -
@@ -62,7 +62,7 @@ configures the whole thing.
 
 - **Add-on UI**: a Talk button for quick browser testing of the live pipeline.
 - **Lovelace dashboard card**: a dedicated WebRTC card with a live transcript.
-- **Home Assistant Assist**: the custom component exposes Sarvam Assist as
+- **Home Assistant Assist**: the custom component exposes Vaani as
   Conversation, Speech-to-text, and Text-to-speech.
 - **ESPHome voice satellites**: the bundled `va_pipecat` component provides
   wake-word turns, live transcripts, follow-up conversation, and full-duplex
@@ -82,23 +82,23 @@ configures the whole thing.
 2. Add the same repository URL to **HACS > Custom repositories** as an
    **Integration**.
 
-3. Install the **Sarvam Assist** add-on from the Home Assistant add-on store.
+3. Install the **Vaani** add-on from the Home Assistant add-on store.
    It builds locally the first time, which can take a few minutes - check the
    Supervisor log for progress.
 
-4. Install the **Sarvam Assist** custom component from HACS, then restart Home
+4. Install the **Vaani** custom component from HACS, then restart Home
    Assistant when HACS asks you to.
 
-5. Add the **Sarvam Assist** integration in **Settings > Devices & services**.
+5. Add the **Vaani** integration in **Settings > Devices & services**.
    It should auto-detect the add-on URL through Supervisor.
 
-6. In **Settings > Voice assistants**, select **Sarvam Assist** for
+6. In **Settings > Voice assistants**, select **Vaani** for
    Conversation, Speech-to-text, and Text-to-speech.
 
-7. Open the Sarvam Assist add-on UI and paste your Sarvam API key, pick a
+7. Open the Vaani add-on UI and paste your Sarvam API key, pick a
    voice and language, and confirm Home Assistant MCP shows connected.
 
-8. Add the **Sarvam Assist** Lovelace card to a dashboard and start talking.
+8. Add the **Vaani** Lovelace card to a dashboard and start talking.
 
 ## Model: Sarvam Cloud vs. Local
 
@@ -184,7 +184,7 @@ grammar rule is added - the model follows its own default behavior.
 
 ## Home Assistant MCP
 
-Sarvam Assist uses Home Assistant's Model Context Protocol server through the
+Vaani uses Home Assistant's Model Context Protocol server through the
 Supervisor connection automatically (`homeassistant_api: true`) - there is no
 separate MCP add-on or custom MCP server to configure. Open the settings page
 and use **Test** to confirm the connection and see the available tool count.
@@ -233,34 +233,38 @@ configuration and conversation lifecycle.
 Standalone `pipecat-esp32` clients remain supported through the SmallWebRTC
 `/api/offer` endpoint.
 
-## Migrating from an older Pipecat Assist install
+## Migrating from an older install
 
-If you're upgrading from a pre-Sarvam-only build of this add-on:
+Your Sarvam API key, STT/LLM/TTS models, voice, language, and custom
+instructions/greeting all carry over automatically - nothing to re-enter.
+If you're upgrading from a pre-Sarvam-only build, any other provider you had
+configured (Gemini, OpenAI, Deepgram, etc.) is dropped, since those
+providers no longer exist in this build.
 
-- Your Sarvam API key, STT/LLM/TTS models, voice, and language carry over
-  automatically - nothing to re-enter.
-- Your custom instructions and greeting text carry over automatically too.
-- Any other provider you had configured (Gemini, OpenAI, Deepgram, etc.) is
-  dropped, since those providers no longer exist in this build.
-- The Home Assistant integration's domain changed from `pipecat_assist` to
-  `sarvam_assist` - remove the old integration entry and add **Sarvam Assist**
-  again once (any automations/scripts referencing old `pipecat_assist.*`
-  entity IDs will need updating to the new `sarvam_assist.*` ones).
-- Any Lovelace dashboard using `custom:pipecat-assist-card` needs to be
-  changed to `custom:sarvam-assist-card`.
+The add-on's slug (`sarvam_assist`) did **not** change with this rename, so
+it updates in place with no reinstall. The **Home Assistant integration's
+domain did change** (`pipecat_assist` -> `sarvam_assist` -> now `vaani`), so:
+
+- Remove the old `Sarvam Assist`/`Pipecat Assist` Home Assistant integration
+  entry and add **Vaani** again once (update any automations/scripts
+  referencing old `sarvam_assist.*`/`pipecat_assist.*` entity IDs to the new
+  `vaani.*` ones).
+- Update any Lovelace dashboard using `custom:sarvam-assist-card` or
+  `custom:pipecat-assist-card` to `custom:vaani-card`.
 
 ## Repository layout
 
-- `addons/pipecat_assist` - the Home Assistant add-on (directory name kept for
-  continuity; the add-on itself is named and slugged "Sarvam Assist"). It runs
-  the fixed pipeline, serves the settings UI through Ingress, exposes WebRTC
-  and ESPHome satellite transports, and connects to Home Assistant MCP.
+- `addons/pipecat_assist` - the Home Assistant add-on (directory name and
+  slug `sarvam_assist` kept for continuity across renames; the add-on's
+  display name is "Vaani"). It runs the fixed pipeline, serves the settings
+  UI through Ingress, exposes WebRTC and ESPHome satellite transports, and
+  connects to Home Assistant MCP.
 - `addons/pipecat_assist/ui-src` - the React source for the settings UI,
   shipped as static assets inside the add-on image.
 - `components/va_pipecat` - the ESPHome external component and its device-side
   PCM transport.
-- `custom_components/sarvam_assist` - the Home Assistant integration exposing
-  Sarvam Assist as Conversation, STT, TTS, AI Task entities, and the Lovelace
+- `custom_components/vaani` - the Home Assistant integration exposing
+  Vaani as Conversation, STT, TTS, AI Task entities, and the Lovelace
   WebRTC card asset.
 - `.github/workflows` - CI and GHCR publishing workflows for multi-arch Home
   Assistant images.
@@ -269,7 +273,7 @@ If you're upgrading from a pre-Sarvam-only build of this add-on:
 
 ```mermaid
 flowchart LR
-    ESPHome["ESPHome va_pipecat satellite"] -->|"PCM WebSocket /api/assist/esphome"| Addon["Sarvam Assist add-on"]
+    ESPHome["ESPHome va_pipecat satellite"] -->|"PCM WebSocket /api/assist/esphome"| Addon["Vaani add-on"]
     ESP32["Standalone Pipecat ESP32"] -->|"SmallWebRTC /api/offer"| Addon
     Browser["HA Ingress settings UI"] --> Addon
     HAConv["HA Assist bridge"] -->|"Conversation / STT / TTS HTTP bridge"| Addon
@@ -284,7 +288,7 @@ flowchart LR
 ## Development
 
 ```bash
-python -m compileall addons/pipecat_assist/app custom_components/sarvam_assist
+python -m compileall addons/pipecat_assist/app custom_components/vaani
 ```
 
 For the settings UI:
@@ -298,7 +302,7 @@ pnpm build
 For a container build:
 
 ```bash
-docker build -t sarvam-assist:dev addons/pipecat_assist
+docker build -t vaani:dev addons/pipecat_assist
 ```
 
 ## References

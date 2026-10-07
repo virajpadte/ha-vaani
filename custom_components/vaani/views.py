@@ -1,4 +1,4 @@
-"""HTTP proxy views for the Sarvam Assist Lovelace card."""
+"""HTTP proxy views for the Vaani Lovelace card."""
 
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CONF_TOKEN, CONF_URL, DOMAIN
 
-PROXY_CONFIG_PATH = "/api/sarvam_assist/config"
-PROXY_OFFER_PATH = "/api/sarvam_assist/offer"
+PROXY_CONFIG_PATH = "/api/vaani/config"
+PROXY_OFFER_PATH = "/api/vaani/offer"
 
 
 def register_proxy_views(hass: HomeAssistant) -> None:
@@ -25,8 +25,8 @@ def register_proxy_views(hass: HomeAssistant) -> None:
     data = hass.data.setdefault(DOMAIN, {})
     if data.get("proxy_views_registered"):
         return
-    hass.http.register_view(SarvamAssistConfigView())
-    hass.http.register_view(SarvamAssistOfferView())
+    hass.http.register_view(VaaniConfigView())
+    hass.http.register_view(VaaniOfferView())
     data["proxy_views_registered"] = True
 
 
@@ -37,10 +37,10 @@ def _entry_from_request(hass: HomeAssistant, request: web.Request) -> ConfigEntr
         entry = next((item for item in entries if item.entry_id == entry_id), None)
         if entry:
             return entry
-        raise web.HTTPNotFound(text="Sarvam Assist entry was not found.")
+        raise web.HTTPNotFound(text="Vaani entry was not found.")
     if entries:
         return entries[0]
-    raise web.HTTPNotFound(text="Sarvam Assist is not configured.")
+    raise web.HTTPNotFound(text="Vaani is not configured.")
 
 
 def _addon_url(entry: ConfigEntry, path: str) -> str:
@@ -69,15 +69,15 @@ async def _load_addon_config(
                     raise web.HTTPBadGateway(text=await response.text())
                 data = await response.json()
     except (TimeoutError, aiohttp.ClientError) as err:
-        raise web.HTTPBadGateway(text=f"Sarvam Assist add-on is not reachable: {err}") from err
+        raise web.HTTPBadGateway(text=f"Vaani add-on is not reachable: {err}") from err
     return data if isinstance(data, dict) else {}
 
 
-class SarvamAssistConfigView(HomeAssistantView):
+class VaaniConfigView(HomeAssistantView):
     """Return add-on config through Home Assistant auth."""
 
     url = PROXY_CONFIG_PATH
-    name = "api:sarvam_assist:config"
+    name = "api:vaani:config"
     requires_auth = True
 
     async def get(self, request: web.Request) -> web.Response:
@@ -90,11 +90,11 @@ class SarvamAssistConfigView(HomeAssistantView):
         return web.json_response(data)
 
 
-class SarvamAssistOfferView(HomeAssistantView):
+class VaaniOfferView(HomeAssistantView):
     """Proxy a SmallWebRTC offer to the add-on without exposing add-on tokens."""
 
     url = PROXY_OFFER_PATH
-    name = "api:sarvam_assist:offer"
+    name = "api:vaani:offer"
     requires_auth = True
 
     async def post(self, request: web.Request) -> web.Response:
@@ -118,4 +118,4 @@ class SarvamAssistOfferView(HomeAssistantView):
                         headers={"Content-Type": response.headers.get("Content-Type", "application/json")},
                     )
         except (TimeoutError, aiohttp.ClientError) as err:
-            raise web.HTTPBadGateway(text=f"Sarvam Assist offer failed: {err}") from err
+            raise web.HTTPBadGateway(text=f"Vaani offer failed: {err}") from err

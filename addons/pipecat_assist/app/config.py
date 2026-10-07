@@ -1,4 +1,4 @@
-"""Runtime configuration for the Sarvam Assist add-on."""
+"""Runtime configuration for the Vaani add-on."""
 
 from __future__ import annotations
 
@@ -101,7 +101,7 @@ class IntegrationConfig(BaseModel):
 
 
 class PipelineStepConfig(BaseModel):
-    """One step in the fixed Sarvam Assist pipeline."""
+    """One step in the fixed Vaani pipeline."""
 
     id: str
     kind: Literal["transport", "memory", "vad", "stt", "llm", "web_search", "tools", "tts"]
@@ -161,7 +161,7 @@ def default_integrations() -> list[IntegrationConfig]:
 
 
 def default_steps() -> list[PipelineStepConfig]:
-    """Return the fixed Sarvam Assist pipeline: STT -> LLM -> Tools -> TTS, +Memory/VAD."""
+    """Return the fixed Vaani pipeline: STT -> LLM -> Tools -> TTS, +Memory/VAD."""
 
     return [
         PipelineStepConfig(id="transport", kind="transport", label="WebRTC"),
@@ -194,10 +194,10 @@ def default_steps() -> list[PipelineStepConfig]:
 
 
 class FlowConfig(BaseModel):
-    """The Sarvam Assist pipeline for one Home Assistant voice flow."""
+    """The Vaani pipeline for one Home Assistant voice flow."""
 
     id: str = "home-default"
-    name: str = "Sarvam Assist"
+    name: str = "Vaani"
     enabled: bool = True
     speed: float = Field(default=1.0, ge=0.25, le=1.5)
     language: str | None = "en-IN"

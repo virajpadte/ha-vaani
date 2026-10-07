@@ -1,7 +1,7 @@
 {
-  "domain": "sarvam_assist",
-  "name": "Sarvam Assist",
-  "version": "0.1.80",
+  "domain": "vaani",
+  "name": "Vaani",
+  "version": "0.1.81",
   "codeowners": ["@virajpadte"],
   "config_flow": true,
   "dependencies": ["ai_task", "conversation", "frontend", "lovelace", "stt", "tts"],

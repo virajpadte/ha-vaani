@@ -21,7 +21,7 @@ jobs:
           python-version: "3.12"
       - name: Compile Python sources
         run: |
-          python -m compileall addons/pipecat_assist/app custom_components/sarvam_assist
+          python -m compileall addons/pipecat_assist/app custom_components/vaani
       - name: Install lightweight test dependencies
         run: |
           python -m pip install "httpx>=0.28,<1" "loguru>=0.7,<1"

@@ -1,8 +1,8 @@
-# Sarvam Assist Documentation
+# Vaani Documentation
 
 ## What this add-on is
 
-Sarvam Assist runs one fixed realtime voice pipeline - **Sarvam
+Vaani runs one fixed realtime voice pipeline - **Sarvam
 speech-to-text -> Model -> Home Assistant tools -> Sarvam text-to-speech**,
 with optional session memory and web search - rather than a configurable
 multi-provider pipeline builder. Speech-to-text and text-to-speech are always
@@ -18,7 +18,7 @@ Sarvam AI; only the Model step has a choice (Sarvam Cloud or Local).
 
 ## Configuration
 
-Most settings live in the Sarvam Assist settings UI, not in Home Assistant
+Most settings live in the Vaani settings UI, not in Home Assistant
 add-on options.
 
 `runner_port`
@@ -60,7 +60,7 @@ The settings screen configures the whole fixed pipeline in one place:
 
 ### Home Assistant MCP
 
-In a normal Home Assistant add-on install, Sarvam Assist uses the Supervisor
+In a normal Home Assistant add-on install, Vaani uses the Supervisor
 token provided by Home Assistant (`homeassistant_api: true`) to reach
 `/api/mcp` - there's nothing to configure beyond confirming the **Test**
 control shows a healthy tool count. A manual access token is only needed for
@@ -68,7 +68,7 @@ custom deployments where the Supervisor token is unavailable.
 
 ### Exposed device context and "turn on/off all" requests
 
-At the start of each session, Sarvam Assist loads the list of devices you've
+At the start of each session, Vaani loads the list of devices you've
 exposed to Assist (name, domain, area) into the model's context, cached for
 about a minute. This lets you refer to devices naturally - in your configured
 language, English, or mixed - without any device name ever being hardcoded in
@@ -154,12 +154,12 @@ LAN hostname is not enough for microphone access in most browsers.
 This verifies the custom Home Assistant entities and MCP tools through the
 classic STT -> Conversation -> TTS path (not full-duplex WebRTC).
 
-1. Install the **Sarvam Assist** custom component (via HACS or by copying
-   `custom_components/sarvam_assist` into Home Assistant) and restart.
-2. Add **Sarvam Assist** from **Settings > Devices & services**.
+1. Install the **Vaani** custom component (via HACS or by copying
+   `custom_components/vaani` into Home Assistant) and restart.
+2. Add **Vaani** from **Settings > Devices & services**.
 3. Confirm the suggested add-on URL; the integration asks Supervisor for the
    installed add-on and prefills the first reachable URL.
-4. In **Settings > Voice assistants**, select **Sarvam Assist** for
+4. In **Settings > Voice assistants**, select **Vaani** for
    Conversation, Speech-to-text, and Text-to-speech.
 5. Speak or type a Home Assistant request in Assist and check the add-on logs
    for MCP tool calls and model responses.
@@ -168,28 +168,28 @@ classic STT -> Conversation -> TTS path (not full-duplex WebRTC).
 
 The custom component automatically registers the dashboard card module. In
 the default Lovelace storage mode, open a dashboard, select **Add card**, and
-choose **Sarvam Assist** from **Custom cards**.
+choose **Vaani** from **Custom cards**.
 
 If your Lovelace resources are managed in YAML mode:
 
 ```yaml
 lovelace:
   resources:
-    - url: /sarvam_assist/sarvam-assist-card.js
+    - url: /vaani/vaani-card.js
       type: module
 ```
 
 ```yaml
-type: custom:sarvam-assist-card
-name: Sarvam Assist
+type: custom:vaani-card
+name: Vaani
 animation_on_idle: true
 compact_mode: false
 accent_color: "#206cff"
 audio_buffer_ms: 120
 ```
 
-The card talks to Home Assistant at `/api/sarvam_assist/config` and
-`/api/sarvam_assist/offer`. The custom component proxies those calls to the
+The card talks to Home Assistant at `/api/vaani/config` and
+`/api/vaani/offer`. The custom component proxies those calls to the
 add-on and keeps the add-on Ingress token out of dashboard YAML.
 
 `animation_on_idle` keeps the visualizer moving while nobody is speaking;
@@ -233,19 +233,23 @@ export PIPECAT_SMALLWEBRTC_URL="http://<ha-lan-ip>:7860/api/offer?token=<satelli
 
 ## Migrating from an older version
 
-If you're upgrading from a pre-Sarvam-only build of this add-on, your
-existing Sarvam integration's API key, STT/LLM/TTS models, voice, and
-language, and your flow's custom instructions and greeting, all carry over
-automatically on the first load after upgrading - nothing to re-enter. Any
-other provider you had configured no longer exists in this build and is
-dropped. You will need to:
+Your Sarvam integration's API key, STT/LLM/TTS models, voice, and language,
+and your flow's custom instructions and greeting, all carry over
+automatically on the first load after upgrading the add-on - nothing to
+re-enter. If you're upgrading from a pre-Sarvam-only build, any other
+provider you had configured no longer exists in this build and is dropped.
 
-- Remove the old `Pipecat Assist` Home Assistant integration entry and add
-  **Sarvam Assist** once (its domain changed from `pipecat_assist` to
-  `sarvam_assist`; update any automation/script referencing the old
-  `pipecat_assist.*` entity IDs).
-- Update any Lovelace dashboard using `custom:pipecat-assist-card` to
-  `custom:sarvam-assist-card`.
+The add-on's own slug (`sarvam_assist`) did **not** change with this rename,
+so the add-on itself updates in place with no reinstall needed. The **Home
+Assistant integration's domain did change** (it's been `pipecat_assist`,
+then `sarvam_assist`, and is now `vaani`), so you will need to:
+
+- Remove the old `Sarvam Assist` (or `Pipecat Assist`) Home Assistant
+  integration entry and add **Vaani** once (update any automation/script
+  referencing old `sarvam_assist.*` or `pipecat_assist.*` entity IDs to the
+  new `vaani.*` ones).
+- Update any Lovelace dashboard using `custom:sarvam-assist-card` or
+  `custom:pipecat-assist-card` to `custom:vaani-card`.
 
 ## Troubleshooting
 

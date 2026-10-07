@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.93
+
+- Renamed the add-on's display name and the Home Assistant integration to
+  **Vaani** (integration domain `sarvam_assist` -> `vaani`; Lovelace card
+  `sarvam-assist-card` -> `vaani-card`). The add-on's slug intentionally
+  stayed `sarvam_assist` so it updates in place with no reinstall and no
+  settings loss; only the Home Assistant integration needs a one-time
+  re-add. Replaced the "Sarvam Assist" wordmark with "Vaani" across the
+  icon/logo, UI, and docs - "Sarvam AI" remains as the underlying provider
+  name throughout, since that hasn't changed.
+
 ## 0.1.92
 
 - Replaced the free-text Language field (which required typing a Sarvam

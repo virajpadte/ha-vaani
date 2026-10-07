@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Vaani",
+        "description": "Connect Home Assistant Assist, STT, TTS, and Lovelace to the Vaani add-on. The URL is detected automatically when Supervisor access is available.",
+        "data": {
+          "url": "Add-on URL"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to Vaani."
+    },
+    "abort": {
+      "already_configured": "Vaani is already configured."
+    }
+  }
+}

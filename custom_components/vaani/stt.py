@@ -1,4 +1,4 @@
-"""Speech-to-text entity for Sarvam Assist."""
+"""Speech-to-text entity for Vaani."""
 
 from __future__ import annotations
 
@@ -174,16 +174,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Sarvam Assist STT entity."""
+    """Set up the Vaani STT entity."""
 
-    async_add_entities([SarvamAssistSpeechToTextEntity(hass, entry)])
+    async_add_entities([VaaniSpeechToTextEntity(hass, entry)])
 
 
-class SarvamAssistSpeechToTextEntity(stt.SpeechToTextEntity):
-    """Speech-to-text bridge backed by the Sarvam Assist add-on."""
+class VaaniSpeechToTextEntity(stt.SpeechToTextEntity):
+    """Speech-to-text bridge backed by the Vaani add-on."""
 
     _attr_has_entity_name = True
-    _attr_name = "Sarvam Assist"
+    _attr_name = "Vaani"
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.hass = hass
@@ -259,11 +259,11 @@ class SarvamAssistSpeechToTextEntity(stt.SpeechToTextEntity):
                 if response.status >= 400:
                     try:
                         data = await response.json()
-                        detail = data.get("detail", "Sarvam Assist STT failed.")
+                        detail = data.get("detail", "Vaani STT failed.")
                     except (aiohttp.ClientError, ValueError):
                         detail = await response.text()
                     return stt.SpeechResult(
-                        text=detail or "Sarvam Assist STT failed.",
+                        text=detail or "Vaani STT failed.",
                         result=stt.SpeechResultState.ERROR,
                     )
                 data = await response.json()
@@ -339,7 +339,7 @@ class SarvamAssistSpeechToTextEntity(stt.SpeechToTextEntity):
                                 )
                             if data.get("type") == "error":
                                 return stt.SpeechResult(
-                                    text=data.get("detail") or "Sarvam Assist STT failed.",
+                                    text=data.get("detail") or "Vaani STT failed.",
                                     result=stt.SpeechResultState.ERROR,
                                 )
                         elif message.type in {

@@ -1,5 +1,5 @@
-name: Sarvam Assist
-version: "0.1.92"
+name: Vaani
+version: "0.1.93"
 slug: sarvam_assist
 description: Indic-language Home Assistant voice assistant powered by Sarvam AI (English plus 10 Indic languages), with Home Assistant MCP device control and ESP32 satellite support.
 url: https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai

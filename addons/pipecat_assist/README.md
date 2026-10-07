@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="logo.png" alt="Sarvam Assist" width="320">
+  <img src="logo.png" alt="Vaani" width="320">
 </p>
 
-# Sarvam Assist
+# Vaani
 
-Sarvam Assist runs a fixed, Indic-language realtime voice pipeline inside Home
+Vaani runs a fixed, Indic-language realtime voice pipeline inside Home
 Assistant: **Sarvam STT -> Model -> Home Assistant tools -> Sarvam TTS**, with
 optional session memory and web search. It connects to Home Assistant MCP
 automatically through the Supervisor, serves a settings UI through Ingress,

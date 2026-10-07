@@ -1,4 +1,4 @@
-"""Text-to-speech entity for Sarvam Assist."""
+"""Text-to-speech entity for Vaani."""
 
 from __future__ import annotations
 
@@ -31,16 +31,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Sarvam Assist TTS entity."""
+    """Set up the Vaani TTS entity."""
 
-    async_add_entities([SarvamAssistTextToSpeechEntity(hass, entry)])
+    async_add_entities([VaaniTextToSpeechEntity(hass, entry)])
 
 
-class SarvamAssistTextToSpeechEntity(TextToSpeechEntity):
-    """Text-to-speech bridge backed by the Sarvam Assist add-on."""
+class VaaniTextToSpeechEntity(TextToSpeechEntity):
+    """Text-to-speech bridge backed by the Vaani add-on."""
 
     _attr_has_entity_name = True
-    _attr_name = "Sarvam Assist"
+    _attr_name = "Vaani"
     _attr_default_language = DEFAULT_LANGUAGE
     _attr_supported_languages = SUPPORTED_LANGUAGES
     _attr_supported_options = [ATTR_PREFERRED_FORMAT, ATTR_VOICE]

@@ -116,7 +116,7 @@ const ASSISTANT_CARD_TRANSLATIONS = {
     waitingForMicrophone: "Waiting for microphone permission",
     microphoneUnavailable: "Microphone access is not available from this browser context.",
     microphoneBlocked: "Microphone access is blocked. Allow microphone access and retry.",
-    connectedDetail: "Connected. Speak to Sarvam Assist.",
+    connectedDetail: "Connected. Speak to Vaani.",
     connectingAudio: "Connecting audio",
     setupNeeded: "Setup needed",
   },
@@ -133,7 +133,7 @@ const ASSISTANT_CARD_TRANSLATIONS = {
     waitingForMicrophone: "Oczekiwanie na zgodę użycia mikrofonu",
     microphoneUnavailable: "Dostęp do mikrofonu nie jest dostępny w tej przeglądarce.",
     microphoneBlocked: "Dostęp do mikrofonu jest zablokowany. Zezwól na mikrofon i spróbuj ponownie.",
-    connectedDetail: "Połączono. Powiedz coś do Sarvam Assist.",
+    connectedDetail: "Połączono. Powiedz coś do Vaani.",
     connectingAudio: "Łączenie audio",
     setupNeeded: "Wymagana konfiguracja",
   },
@@ -910,14 +910,14 @@ function App() {
         <div className="brand">
           <img src="assets/logo.svg" alt="" />
           <div>
-            <h1>Sarvam Assist</h1>
+            <h1>Vaani</h1>
             <span className={readiness.ok ? "state ok" : "state error"}>
               {readiness.ok ? t("ready") : t("setup needed")}
             </span>
           </div>
         </div>
 
-        <nav className="tabs" aria-label="Sarvam Assist">
+        <nav className="tabs" aria-label="Vaani">
           {[
             ["assistant", "Assistant", Bot],
             ["settings", "Settings", Settings],
@@ -1000,7 +1000,7 @@ function AssistantView({ config, flow, status }) {
           <Bot size={34} />
         </div>
         <div className="assistant-title">
-          <span>Sarvam Assist</span>
+          <span>Vaani</span>
           <h3>{flow.name}</h3>
           <strong>{readiness.ok ? t("Ready") : readiness.detail}</strong>
         </div>
@@ -2336,7 +2336,7 @@ function VoiceTest({ config, flow }) {
     <div className="assistant-card-test" style={{ "--assistant-card-accent": ASSISTANT_CARD_ACCENT_HEX }}>
       <div className="assistant-card-head">
         <div className="assistant-card-title">
-          <h3>Sarvam Assist</h3>
+          <h3>Vaani</h3>
           <span className={`assistant-card-status ${statusClass}`}>{stateLabel}</span>
         </div>
         <div className="assistant-card-actions">
