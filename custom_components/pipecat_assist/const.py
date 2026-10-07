@@ -1,7 +1,7 @@
 """Constants for Pipecat Assist."""
 
 DOMAIN = "pipecat_assist"
-VERSION = "0.1.77"
+VERSION = "0.1.78"
 CONF_URL = "url"
 CONF_TOKEN = "token"
 CONF_FLOW_ID = "flow_id"
@@ -10,7 +10,9 @@ DEFAULT_LANGUAGE = "en"
 SUPPORTED_LANGUAGES = [
     "af",
     "ar",
+    "as",
     "bg",
+    "bn",
     "ca",
     "cs",
     "da",
@@ -29,6 +31,7 @@ SUPPORTED_LANGUAGES = [
     "fi",
     "fr",
     "fr-FR",
+    "gu",
     "he",
     "hi",
     "hr",
@@ -37,12 +40,18 @@ SUPPORTED_LANGUAGES = [
     "it",
     "it-IT",
     "ja",
+    "kn",
     "ko",
     "lt",
     "lv",
+    "ml",
+    "mr",
+    "ne",
     "nl",
     "nl-NL",
     "no",
+    "or",
+    "pa",
     "pl",
     "pl-PL",
     "pt",
@@ -50,13 +59,17 @@ SUPPORTED_LANGUAGES = [
     "pt-PT",
     "ro",
     "ru",
+    "sa",
     "sk",
     "sl",
     "sr",
     "sv",
+    "ta",
+    "te",
     "th",
     "tr",
     "uk",
+    "ur",
     "vi",
     "zh",
     "zh-CN",
