@@ -108,6 +108,7 @@ from app.mcp_bridge import (
     clear_mcp_tools_cache,
     list_mcp_call_history,
 )
+from app.ha_device_context import build_device_list_text
 from app.session_memory import SESSION_MEMORY
 from app.text_agent import run_text_conversation
 from app.va_pipecat import websocket_transport_params
@@ -4200,6 +4201,13 @@ def _web_search_announces(flow: FlowConfig) -> bool:
     return bool((step.settings or {}).get("announce", True))
 
 
+def _tools_include_device_list(flow: FlowConfig) -> bool:
+    step = _enabled_step(flow, "tools")
+    if not step:
+        return False
+    return bool((step.settings or {}).get("include_device_list", True))
+
+
 def _effective_instructions(flow: FlowConfig) -> str:
     instructions = flow.instructions
     if CONVERSATION_END_SYSTEM_HINT not in instructions:
@@ -5264,6 +5272,19 @@ async def run_bot(
         context_messages = [{"role": "developer", "content": _effective_instructions(flow)}]
         if flow.greeting.strip():
             context_messages.append({"role": "developer", "content": flow.greeting})
+        if bridge and _tools_include_device_list(flow):
+            try:
+                device_entities = await bridge.device_context()
+                device_list_text = build_device_list_text(device_entities)
+                if device_list_text:
+                    context_messages.append({"role": "developer", "content": device_list_text})
+                    logger.info(
+                        "Loaded {} exposed Home Assistant devices into context for flow {}",
+                        len(device_entities),
+                        flow.id,
+                    )
+            except Exception as err:
+                logger.warning("Device context unavailable for flow {}: {}", flow.id, err)
         context_messages = SESSION_MEMORY.restore(
             client_id,
             context_messages,

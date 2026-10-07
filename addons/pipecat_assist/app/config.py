@@ -480,6 +480,7 @@ def default_steps() -> list[PipelineStepConfig]:
             kind="tools",
             label="HA MCP tools",
             integration_id="ha-mcp",
+            settings={"include_device_list": True},
         ),
         PipelineStepConfig(
             id="output",

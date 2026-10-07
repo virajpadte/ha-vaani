@@ -3113,9 +3113,25 @@ function PipelineView({
           </>
         )}
         {selectedStep?.kind === "tools" && (
-          <div className="empty-state">
-            MCP servers are configured globally in Integrations. Enable one or more MCP integrations there to expose tools to this pipeline.
-          </div>
+          <>
+            <div className="divider" />
+            <div className="form-grid">
+              <Toggle
+                checked={selectedStep.settings?.include_device_list !== false}
+                onChange={(value) =>
+                  updateStep(selectedStep.id, (step) => ({
+                    ...step,
+                    settings: { ...(step.settings || {}), include_device_list: value },
+                  }))
+                }
+                label={t("Include device list")}
+              />
+              <div className="empty-state wide">
+                MCP servers are configured globally in Integrations. Enable one or more MCP integrations there to expose tools to this pipeline.
+                When enabled, the model automatically gets a compact list of exposed Home Assistant devices (names, areas, domains) at the start of each session, so it can map spoken device names in any language to the exact names Home Assistant expects.
+              </div>
+            </div>
+          </>
         )}
       </section>
     </div>

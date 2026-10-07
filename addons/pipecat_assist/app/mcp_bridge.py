@@ -21,6 +21,14 @@ from pipecat.adapters.schemas.tools_schema import ToolsSchema
 from pipecat.services.llm_service import LLMService
 from pipecat.services.mcp_service import MCPClient
 
+from app.ha_device_context import (
+    build_fallback_message,
+    build_no_candidate_message,
+    find_best_match,
+    is_match_failed,
+    parse_live_context,
+)
+
 
 class MCPAuthenticationError(RuntimeError):
     """Raised when Home Assistant rejects the MCP bearer token."""
@@ -28,6 +36,8 @@ class MCPAuthenticationError(RuntimeError):
 
 MCP_CALL_HISTORY: deque[dict[str, Any]] = deque(maxlen=100)
 MCP_TOOLS_SCHEMA_CACHE: dict[tuple[str, tuple[str, ...]], tuple[ToolsSchema, float]] = {}
+DEVICE_CONTEXT_CACHE: dict[tuple[str, ...], tuple[float, list[dict]]] = {}
+DEVICE_CONTEXT_TTL_SECONDS = 60
 LLM_SCHEMA_SCALAR_TYPES = {"string", "number", "integer", "boolean", "object", "array"}
 LLM_SCHEMA_STRING_FIELDS = {"description", "format", "title"}
 
@@ -556,7 +566,81 @@ class CombinedMCPBridge:
         if not route:
             raise RuntimeError(f"Unknown MCP tool: {name}")
         bridge, original_name = route
-        return await bridge.call_tool(original_name, arguments)
+        result = await bridge.call_tool(original_name, arguments)
+
+        failure = is_match_failed(result)
+        if not failure:
+            return result
+
+        constraints = failure.get("constraints") or {}
+        requested_name = str(constraints.get("name") or arguments.get("name") or "").strip()
+        requested_area = str(constraints.get("area") or arguments.get("area") or "").strip() or None
+        requested_domain = constraints.get("domain") or arguments.get("domain")
+        if not requested_name:
+            return result
+
+        entities = await self.device_context()
+        if not entities:
+            # No device list to suggest from - don't fabricate a fallback, just pass
+            # the original failure through.
+            return result
+
+        candidate, score = find_best_match(requested_name, requested_area, requested_domain, entities)
+        if candidate:
+            logger.info(
+                "MCP match-failed fallback: requested={!r} area={!r} candidate={!r} score={:.2f}",
+                requested_name,
+                requested_area,
+                candidate["name"],
+                score,
+            )
+            return build_fallback_message(candidate, score, requested_name, requested_area)
+
+        logger.info(
+            "MCP match-failed fallback: requested={!r} area={!r} no candidate (best score={:.2f})",
+            requested_name,
+            requested_area,
+            score,
+        )
+        return build_no_candidate_message(requested_name, requested_area)
+
+    async def device_context(
+        self,
+        *,
+        cache_ttl_seconds: int = DEVICE_CONTEXT_TTL_SECONDS,
+        refresh: bool = False,
+    ) -> list[dict]:
+        """Return the exposed Home Assistant device list via the GetLiveContext tool.
+
+        Cached for ``cache_ttl_seconds`` so repeated sessions/turns within that window don't
+        re-fetch. Never raises - logs a warning and returns ``[]`` on any failure, including
+        when no server exposes a GetLiveContext-style tool.
+        """
+
+        cache_key = tuple(sorted(str(spec.get("url") or "") for spec in self.server_specs))
+        cached = DEVICE_CONTEXT_CACHE.get(cache_key)
+        now = time.time()
+        if not refresh and cached and (cache_ttl_seconds <= 0 or now - cached[0] <= cache_ttl_seconds):
+            return cached[1]
+
+        try:
+            if not self._tool_routes:
+                await self.tools_schema()
+            route_name = next(
+                (name for name in self._tool_routes if name.endswith("GetLiveContext")), None
+            )
+            if not route_name:
+                logger.warning("No GetLiveContext-style tool is exposed by any MCP server")
+                return []
+            bridge, original_name = self._tool_routes[route_name]
+            raw = await bridge.call_tool(original_name, {})
+            entities = parse_live_context(raw)
+        except Exception as err:
+            logger.warning("Could not fetch Home Assistant device context: {}", err)
+            return []
+
+        DEVICE_CONTEXT_CACHE[cache_key] = (now, entities)
+        return entities
 
 
 async def check_mcp(
