@@ -1,4 +1,4 @@
-const PIPECAT_ASSIST_CARD_VERSION = "0.1.77";
+const SARVAM_ASSIST_CARD_VERSION = "0.1.79";
 const DEFAULT_ACCENT_HEX = "#206cff";
 const DEFAULT_AUDIO_BUFFER_MS = 120;
 const STREAM_FADE_GROUPS = 4;
@@ -39,7 +39,7 @@ const CARD_TRANSLATIONS = {
     waitingForMicrophone: "Waiting for microphone permission",
     microphoneUnavailable: "Microphone access is not available from this browser context.",
     microphoneBlocked: "Microphone access is blocked. Allow microphone access and retry.",
-    connectedDetail: "Connected. Speak to Pipecat Assist.",
+    connectedDetail: "Connected. Speak to Sarvam Assist.",
     connectingAudio: "Connecting audio",
   },
   pl: {
@@ -55,7 +55,7 @@ const CARD_TRANSLATIONS = {
     waitingForMicrophone: "Oczekiwanie na zgodę użycia mikrofonu",
     microphoneUnavailable: "Dostęp do mikrofonu nie jest dostępny w tej przeglądarce.",
     microphoneBlocked: "Dostęp do mikrofonu jest zablokowany. Zezwól na mikrofon i spróbuj ponownie.",
-    connectedDetail: "Połączono. Powiedz coś do Pipecat Assist.",
+    connectedDetail: "Połączono. Powiedz coś do Sarvam Assist.",
     connectingAudio: "Łączenie audio",
   },
 };
@@ -336,19 +336,19 @@ function shouldEndConversation(text) {
 
 function rememberAudioSampleRate(value) {
   const sampleRate = Number(value || 0);
-  if (sampleRate > 0) window.__pipecatAssistLastSampleRate = sampleRate;
+  if (sampleRate > 0) window.__sarvamAssistLastSampleRate = sampleRate;
 }
 
 function haAssistSampleRateFallback() {
-  const remembered = Number(window.__pipecatAssistLastSampleRate || 0);
+  const remembered = Number(window.__sarvamAssistLastSampleRate || 0);
   return remembered > 0 ? remembered : HA_ASSIST_SAMPLE_RATE_FALLBACK;
 }
 
 function installHaAssistSampleRateGuard() {
-  if (window.__pipecatAssistSampleRateGuardInstalled || !window.WebSocket?.prototype?.send) return;
-  window.__pipecatAssistSampleRateGuardInstalled = true;
+  if (window.__sarvamAssistSampleRateGuardInstalled || !window.WebSocket?.prototype?.send) return;
+  window.__sarvamAssistSampleRateGuardInstalled = true;
   const originalSend = window.WebSocket.prototype.send;
-  window.WebSocket.prototype.send = function pipecatAssistSend(data) {
+  window.WebSocket.prototype.send = function sarvamAssistSend(data) {
     if (typeof data !== "string" || !data.includes("assist_pipeline/run")) {
       return originalSend.call(this, data);
     }
@@ -412,14 +412,14 @@ function preferFullbandOpus(sdp) {
   }).join(separator);
 }
 
-class PipecatAssistCard extends HTMLElement {
+class SarvamAssistCard extends HTMLElement {
   constructor() {
     super();
     this.stopOnPageExit = () => this.stop();
   }
 
   static getStubConfig() {
-    return { name: "Pipecat Assist" };
+    return { name: "Sarvam Assist" };
   }
 
   connectedCallback() {
@@ -879,7 +879,7 @@ class PipecatAssistCard extends HTMLElement {
 
   async loadAddonConfig() {
     const path = this.proxyMode()
-      ? `/api/pipecat_assist/config${this.entryQuery()}`
+      ? `/api/sarvam_assist/config${this.entryQuery()}`
       : "/api/assist/config";
     const response = await fetch(this.apiUrl(path), { headers: this.authHeaders() });
     if (!response.ok) throw new Error(`Config failed with HTTP ${response.status}`);
@@ -914,7 +914,7 @@ class PipecatAssistCard extends HTMLElement {
   }
 
   clientId() {
-    const key = "pipecat-assist-lovelace-client-id";
+    const key = "sarvam-assist-lovelace-client-id";
     const existing = localStorage.getItem(key);
     if (existing) return existing;
     const created = crypto.randomUUID();
@@ -1354,8 +1354,8 @@ class PipecatAssistCard extends HTMLElement {
           data: {
             version: "1.4.0",
             about: {
-              library: "pipecat-assist-lovelace-card",
-              library_version: PIPECAT_ASSIST_CARD_VERSION,
+              library: "sarvam-assist-lovelace-card",
+              library_version: SARVAM_ASSIST_CARD_VERSION,
               platform: "home-assistant",
             },
           },
@@ -1391,7 +1391,7 @@ class PipecatAssistCard extends HTMLElement {
       await this.waitForIce(peer);
 
       const offerPath = this.proxyMode()
-        ? `/api/pipecat_assist/offer${this.entryQuery()}`
+        ? `/api/sarvam_assist/offer${this.entryQuery()}`
         : addonConfig.runner_offer_path || "api/offer";
       const requestData = {
         source: "lovelace_card",
@@ -1699,8 +1699,8 @@ class PipecatAssistCard extends HTMLElement {
           color: #f7fbff;
           box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
           border: 1px solid rgba(${accentRgb}, 0.34);
-          --pipecat-accent: ${accentHex};
-          --pipecat-accent-rgb: ${accentRgb};
+          --sarvam-accent: ${accentHex};
+          --sarvam-accent-rgb: ${accentRgb};
         }
         .wrap {
           display: grid;
@@ -1783,14 +1783,14 @@ class PipecatAssistCard extends HTMLElement {
           width: 18px;
           overflow: hidden;
           vertical-align: bottom;
-          animation: pipecat-dots 1.1s steps(4, end) infinite;
+          animation: sarvam-dots 1.1s steps(4, end) infinite;
         }
         .status-pill.error {
           color: #ffe1de;
           background: rgba(217, 75, 64, 0.22);
           border-color: rgba(217, 75, 64, 0.5);
         }
-        @keyframes pipecat-dots {
+        @keyframes sarvam-dots {
           0% { width: 0; }
           100% { width: 18px; }
         }
@@ -1947,7 +1947,7 @@ class PipecatAssistCard extends HTMLElement {
         <div class="${compact ? "wrap compact" : "wrap"}">
           <div class="head">
             <div class="title">
-              <h3>${this.config.name || "Pipecat Assist"}</h3>
+              <h3>${this.config.name || "Sarvam Assist"}</h3>
               <span class="status-pill ${statusClass}">${escapeHtml(statusLabel)}</span>
             </div>
             <div class="actions">
@@ -1959,7 +1959,7 @@ class PipecatAssistCard extends HTMLElement {
           <div class="visualizer-shell" aria-hidden="true">
             <canvas class="visualizer"></canvas>
           </div>
-          <span class="version">v${PIPECAT_ASSIST_CARD_VERSION}</span>
+          <span class="version">v${SARVAM_ASSIST_CARD_VERSION}</span>
           <audio autoplay playsinline></audio>
         </div>
       </ha-card>
@@ -1985,36 +1985,36 @@ class PipecatAssistCard extends HTMLElement {
   }
 }
 
-function patchPipecatAssistCard(existingCard) {
-  for (const name of Object.getOwnPropertyNames(PipecatAssistCard.prototype)) {
+function patchSarvamAssistCard(existingCard) {
+  for (const name of Object.getOwnPropertyNames(SarvamAssistCard.prototype)) {
     if (name === "constructor") continue;
     Object.defineProperty(
       existingCard.prototype,
       name,
-      Object.getOwnPropertyDescriptor(PipecatAssistCard.prototype, name),
+      Object.getOwnPropertyDescriptor(SarvamAssistCard.prototype, name),
     );
   }
-  existingCard.getStubConfig = PipecatAssistCard.getStubConfig;
-  existingCard.__pipecatAssistVersion = PIPECAT_ASSIST_CARD_VERSION;
+  existingCard.getStubConfig = SarvamAssistCard.getStubConfig;
+  existingCard.__sarvamAssistVersion = SARVAM_ASSIST_CARD_VERSION;
 }
 
-function collectPipecatAssistCards(root, cards = new Set(), seen = new Set()) {
+function collectSarvamAssistCards(root, cards = new Set(), seen = new Set()) {
   if (!root || seen.has(root)) return cards;
   seen.add(root);
-  if (root.localName === "pipecat-assist-card") cards.add(root);
+  if (root.localName === "sarvam-assist-card") cards.add(root);
   if (!root.querySelectorAll) return cards;
 
-  root.querySelectorAll("pipecat-assist-card").forEach((card) => cards.add(card));
+  root.querySelectorAll("sarvam-assist-card").forEach((card) => cards.add(card));
   root.querySelectorAll("*").forEach((element) => {
-    if (element.shadowRoot) collectPipecatAssistCards(element.shadowRoot, cards, seen);
+    if (element.shadowRoot) collectSarvamAssistCards(element.shadowRoot, cards, seen);
   });
   return cards;
 }
 
-function refreshPipecatAssistCard(card) {
-  if (!card || card.__pipecatAssistVersion === PIPECAT_ASSIST_CARD_VERSION) return;
-  card.__pipecatAssistVersion = PIPECAT_ASSIST_CARD_VERSION;
-  card.config = card.config || { name: "Pipecat Assist" };
+function refreshSarvamAssistCard(card) {
+  if (!card || card.__sarvamAssistVersion === SARVAM_ASSIST_CARD_VERSION) return;
+  card.__sarvamAssistVersion = SARVAM_ASSIST_CARD_VERSION;
+  card.config = card.config || { name: "Sarvam Assist" };
   card.state = card.state || "idle";
   card.detail = card.detail || card.t?.("ready") || "Ready";
   card.userTranscript = card.userTranscript || "";
@@ -2053,13 +2053,13 @@ function refreshPipecatAssistCard(card) {
   if (typeof card.render === "function") card.render();
 }
 
-function refreshPipecatAssistCards() {
-  collectPipecatAssistCards(document).forEach(refreshPipecatAssistCard);
+function refreshSarvamAssistCards() {
+  collectSarvamAssistCards(document).forEach(refreshSarvamAssistCard);
 }
 
-function installPipecatAssistCardRefresher() {
-  if (window.__pipecatAssistCardRefresherInstalled) return;
-  window.__pipecatAssistCardRefresherInstalled = true;
+function installSarvamAssistCardRefresher() {
+  if (window.__sarvamAssistCardRefresherInstalled) return;
+  window.__sarvamAssistCardRefresherInstalled = true;
   let pending = false;
   const observedRoots = new WeakSet();
   let observer;
@@ -2081,7 +2081,7 @@ function installPipecatAssistCardRefresher() {
     requestAnimationFrame(() => {
       pending = false;
       observeRoots(document);
-      refreshPipecatAssistCards();
+      refreshSarvamAssistCards();
     });
   };
   observer = new MutationObserver(schedule);
@@ -2089,21 +2089,21 @@ function installPipecatAssistCardRefresher() {
   [0, 250, 1000, 3000].forEach((delay) => setTimeout(schedule, delay));
 }
 
-const existingPipecatAssistCard = customElements.get("pipecat-assist-card");
-if (existingPipecatAssistCard) {
-  patchPipecatAssistCard(existingPipecatAssistCard);
+const existingSarvamAssistCard = customElements.get("sarvam-assist-card");
+if (existingSarvamAssistCard) {
+  patchSarvamAssistCard(existingSarvamAssistCard);
 } else {
-  customElements.define("pipecat-assist-card", PipecatAssistCard);
+  customElements.define("sarvam-assist-card", SarvamAssistCard);
 }
-installPipecatAssistCardRefresher();
-refreshPipecatAssistCards();
+installSarvamAssistCardRefresher();
+refreshSarvamAssistCards();
 
 window.customCards = Array.isArray(window.customCards) ? window.customCards : [];
-const existingCardIndex = window.customCards.findIndex((card) => card.type === "pipecat-assist-card");
+const existingCardIndex = window.customCards.findIndex((card) => card.type === "sarvam-assist-card");
 if (existingCardIndex >= 0) window.customCards.splice(existingCardIndex, 1);
 window.customCards.push({
-  type: "pipecat-assist-card",
-  name: "Pipecat Assist",
-  description: "Realtime Pipecat Assist voice card.",
+  type: "sarvam-assist-card",
+  name: "Sarvam Assist",
+  description: "Realtime Sarvam Assist voice card.",
   preview: true,
 });

@@ -1,31 +1,29 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyvaith/pipecat-homeassistant/main/addons/pipecat_assist/logo.png" alt="Pipecat Assist" width="320">
+  <img src="logo.png" alt="Sarvam Assist" width="320">
 </p>
 
-# Pipecat Assist
+# Sarvam Assist
 
-Pipecat Assist runs a realtime Pipecat voice agent inside Home Assistant. It
-connects to Home Assistant MCP for device control, serves a web UI through
-Ingress, exposes WebRTC and ESPHome satellite transports, and backs Home
-Assistant AI Tasks for generated data and image generation.
+Sarvam Assist runs a fixed, Marathi- and Indic-language-first realtime voice
+pipeline inside Home Assistant: **Sarvam STT -> Model -> Home Assistant tools
+-> Sarvam TTS**, with optional session memory and web search. It connects to
+Home Assistant MCP automatically through the Supervisor, serves a settings UI
+through Ingress, and exposes WebRTC and ESPHome satellite transports.
 
-Open the web UI after starting the add-on. The first screen is the voice
-assistant test surface. Pipelines are complete runtime profiles used by the UI,
-ESPHome and standalone Pipecat ESP32 satellites, and Home Assistant cards.
+This is a focused, Sarvam-only fork of the original multi-provider
+[Pipecat Assist](https://github.com/kyvaith/pipecat-homeassistant) project -
+there is no provider picker and no visual pipeline builder here, by design.
 
-Gemini Live is preconfigured as the default speech-to-speech profile. The UI
-also includes composed realtime profiles such as `Soniox + OpenAI + Cartesia`,
-`Deepgram + Gemini + Google TTS Streaming`, and `Speechmatics + AWS Nova Pro +
-ElevenLabs`. Provider settings are configured in **Integrations**: realtime
-providers, cloud STT/LLM/TTS providers, Web Search, and Home Assistant MCP are
-kept separate. Google Imagen and fal Image Generation integrations can be used
-for Home Assistant image-generation tasks. Session Memory and Web Search are
-visible pipeline steps, and official Pipecat Flows can be enabled inside
-composed realtime pipelines.
+Open the settings UI after starting the add-on:
 
-The built-in Home Assistant MCP integration uses the Supervisor connection
-automatically. The optional HA MCP Server Add-on integration is also detected
-automatically from the add-on's generated secret URL and does not need a Bearer
-token.
+- Paste your Sarvam API key, pick a voice (grouped by gender - a matching
+  Marathi verb-form system rule is applied automatically) and language.
+- Choose the Model source: **Sarvam Cloud** (default) or **Local
+  (OpenAI-compatible)** for Ollama, vLLM, LM Studio, or a self-hosted Sarvam
+  open-weight model.
+- Confirm Home Assistant MCP shows connected (it uses the Supervisor
+  connection automatically - no separate MCP add-on needed).
+- Optionally enable **Web search** (a Tavily API key) and **Session memory**.
+- Use the **Talk** button to try the live pipeline right from the browser.
 
-For setup, testing, and troubleshooting, see `DOCS.md`.
+For setup, migration notes, and troubleshooting, see `DOCS.md`.

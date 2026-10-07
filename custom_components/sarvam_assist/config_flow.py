@@ -1,4 +1,4 @@
-"""Config flow for Pipecat Assist."""
+"""Config flow for Sarvam Assist."""
 
 from __future__ import annotations
 
@@ -15,9 +15,13 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CONF_URL, DEFAULT_URL, DOMAIN
 
-ADDON_NAME = "Pipecat Assist"
-ADDON_SLUG_SUFFIX = "pipecat_assist"
-ADDON_IMAGE_NAME = "pipecat-assist"
+ADDON_NAME = "Sarvam Assist"
+ADDON_SLUG_SUFFIX = "sarvam_assist"
+# The published GHCR image is still named "pipecat-assist" (that rename is a bigger, separate
+# decision - see the plan) even though the add-on's name/slug are now "Sarvam Assist". Most
+# installs build locally from this repo and have no "image" field at all, so this mostly
+# matters for the "pipecat-homeassistant" repository check below.
+ADDON_IMAGE_NAMES = ("sarvam-assist", "pipecat-assist")
 DEFAULT_ADDON_PORT = 7860
 SUPERVISOR_URL = os.getenv("SUPERVISOR", "http://supervisor").rstrip("/")
 if not SUPERVISOR_URL.startswith(("http://", "https://")):
@@ -37,15 +41,16 @@ def _payload_data(payload: dict[str, Any]) -> dict[str, Any]:
     return data if isinstance(data, dict) else payload
 
 
-def _matches_pipecat_addon(addon: dict[str, Any]) -> bool:
+def _matches_sarvam_addon(addon: dict[str, Any]) -> bool:
     slug = str(addon.get("slug", "")).lower()
     name = str(addon.get("name", "")).lower()
     image = str(addon.get("image", "")).lower()
     repository = str(addon.get("repository", "")).lower()
     return (
         slug.endswith(ADDON_SLUG_SUFFIX)
+        or slug.endswith("pipecat_assist")  # pre-rename slug, for in-place upgrades
         or name == ADDON_NAME.lower()
-        or ADDON_IMAGE_NAME in image
+        or any(candidate in image for candidate in ADDON_IMAGE_NAMES)
         or "pipecat-homeassistant" in repository
     )
 
@@ -99,7 +104,7 @@ async def _supervisor_addon_info(hass: HomeAssistant) -> dict[str, Any] | None:
         (
             item
             for item in addons
-            if isinstance(item, dict) and _matches_pipecat_addon(item)
+            if isinstance(item, dict) and _matches_sarvam_addon(item)
         ),
         None,
     )
@@ -135,8 +140,8 @@ async def _suggest_addon_url(hass: HomeAssistant) -> str:
     return candidates[0] if candidates else DEFAULT_URL
 
 
-class PipecatAssistConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a Pipecat Assist config flow."""
+class SarvamAssistConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a Sarvam Assist config flow."""
 
     VERSION = 1
 
@@ -162,7 +167,7 @@ class PipecatAssistConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(url)
                 self._abort_if_unique_id_configured()
                 data = {CONF_URL: url}
-                return self.async_create_entry(title="Pipecat Assist", data=data)
+                return self.async_create_entry(title="Sarvam Assist", data=data)
 
         return self.async_show_form(
             step_id="user",

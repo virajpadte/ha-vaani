@@ -1,7 +1,7 @@
-name: Pipecat Assist (Sarvam)
-version: "0.1.89"
-slug: sarvam_pipecat_assist
-description: Realtime Pipecat assistant for Home Assistant with MCP device control and ESP32 satellite support.
+name: Sarvam Assist
+version: "0.1.90"
+slug: sarvam_assist
+description: Marathi and Indic-language Home Assistant voice assistant powered by Sarvam AI, with Home Assistant MCP device control and ESP32 satellite support.
 url: https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai
 arch:
   - aarch64

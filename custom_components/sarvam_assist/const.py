@@ -1,7 +1,7 @@
-"""Constants for Pipecat Assist."""
+"""Constants for Sarvam Assist."""
 
-DOMAIN = "pipecat_assist"
-VERSION = "0.1.78"
+DOMAIN = "sarvam_assist"
+VERSION = "0.1.79"
 CONF_URL = "url"
 CONF_TOKEN = "token"
 CONF_FLOW_ID = "flow_id"

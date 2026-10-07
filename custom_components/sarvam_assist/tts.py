@@ -1,4 +1,4 @@
-"""Text-to-speech entity for Pipecat Assist."""
+"""Text-to-speech entity for Sarvam Assist."""
 
 from __future__ import annotations
 
@@ -31,16 +31,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Pipecat Assist TTS entity."""
+    """Set up the Sarvam Assist TTS entity."""
 
-    async_add_entities([PipecatAssistTextToSpeechEntity(hass, entry)])
+    async_add_entities([SarvamAssistTextToSpeechEntity(hass, entry)])
 
 
-class PipecatAssistTextToSpeechEntity(TextToSpeechEntity):
-    """Text-to-speech bridge backed by the Pipecat Assist add-on."""
+class SarvamAssistTextToSpeechEntity(TextToSpeechEntity):
+    """Text-to-speech bridge backed by the Sarvam Assist add-on."""
 
     _attr_has_entity_name = True
-    _attr_name = "Pipecat Assist"
+    _attr_name = "Sarvam Assist"
     _attr_default_language = DEFAULT_LANGUAGE
     _attr_supported_languages = SUPPORTED_LANGUAGES
     _attr_supported_options = [ATTR_PREFERRED_FORMAT, ATTR_VOICE]

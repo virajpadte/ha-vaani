@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.1.90
+
+- Renamed the add-on and Home Assistant integration to **Sarvam Assist**
+  (integration domain `pipecat_assist` -> `sarvam_assist`; Lovelace card
+  `pipecat-assist-card` -> `sarvam-assist-card`). Existing Sarvam API
+  key/models/voice/language and flow instructions/greeting carry over
+  automatically on upgrade.
+- Removed every provider except Sarvam STT/LLM/TTS: Gemini (Live and Cloud),
+  OpenAI (Realtime and Cloud), Anthropic, AWS Bedrock and Nova Sonic,
+  Deepgram, Soniox, Speechmatics, Cartesia, Gradium, ElevenLabs, Google Cloud
+  TTS, image generation, Pipecat Flows, and the free-form pipeline builder.
+  Replaced the old Ollama/local-runtime/OpenAI-compatible options with one
+  consolidated "Local" Model-step option.
+- Replaced the LLM-indirected web search with a direct Tavily search-API
+  tool call - no extra LLM is used to do the searching.
+- Added a Sarvam bulbul speaker-gender map and an automatic Marathi
+  first-person verb-form system rule based on the selected voice.
+- Extended the exposed-device-list system prompt with explicit "turn
+  off/on all lights" guidance (domain-wide turn-off, per-device turn-on,
+  matching switch entities named lamp/light, confirming what changed).
+- Replaced the three-tab pipeline builder/integrations UI with one fixed
+  settings page for the fixed Sarvam pipeline.
+
 ## 0.1.80
 
 - Coalesce streaming user and assistant transcript tokens into cumulative

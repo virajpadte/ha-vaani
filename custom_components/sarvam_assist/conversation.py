@@ -1,4 +1,4 @@
-"""Home Assistant Conversation entity for Pipecat Assist."""
+"""Home Assistant Conversation entity for Sarvam Assist."""
 
 from __future__ import annotations
 
@@ -31,16 +31,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Pipecat Assist conversation entity."""
+    """Set up the Sarvam Assist conversation entity."""
 
-    async_add_entities([PipecatAssistConversationEntity(hass, entry)])
+    async_add_entities([SarvamAssistConversationEntity(hass, entry)])
 
 
-class PipecatAssistConversationEntity(conversation.ConversationEntity):
-    """Conversation entity backed by the Pipecat Assist add-on."""
+class SarvamAssistConversationEntity(conversation.ConversationEntity):
+    """Conversation entity backed by the Sarvam Assist add-on."""
 
     _attr_has_entity_name = True
-    _attr_name = "Pipecat Assist"
+    _attr_name = "Sarvam Assist"
     _attr_supported_features = conversation.ConversationEntityFeature.CONTROL
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -86,7 +86,7 @@ class PipecatAssistConversationEntity(conversation.ConversationEntity):
                         had_error = True
                         response.async_set_error(
                             intent.IntentResponseErrorCode.UNKNOWN,
-                            data.get("detail", "Pipecat Assist returned an error."),
+                            data.get("detail", "Sarvam Assist returned an error."),
                         )
                     elif data.get("error"):
                         had_error = True
@@ -100,7 +100,7 @@ class PipecatAssistConversationEntity(conversation.ConversationEntity):
             had_error = True
             response.async_set_error(
                 intent.IntentResponseErrorCode.UNKNOWN,
-                f"Pipecat Assist is not reachable: {err}",
+                f"Sarvam Assist is not reachable: {err}",
             )
             data = {}
 

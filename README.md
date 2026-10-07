@@ -1,80 +1,70 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyvaith/pipecat-homeassistant/main/addons/pipecat_assist/logo.png" alt="Pipecat Assist" width="420">
+  <img src="addons/pipecat_assist/logo.png" alt="Sarvam Assist" width="320">
 </p>
 
-# Pipecat Home Assistant
+# Sarvam Assist
 
 <p align="center">
-  <a href="https://github.com/kyvaith/pipecat-homeassistant/actions/workflows/ci.yml">
-    <img alt="CI" src="https://github.com/kyvaith/pipecat-homeassistant/actions/workflows/ci.yml/badge.svg?branch=main">
+  <a href="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/ci.yml/badge.svg?branch=main">
   </a>
-  <a href="https://github.com/kyvaith/pipecat-homeassistant/actions/workflows/publish.yml">
-    <img alt="Publish add-on image" src="https://github.com/kyvaith/pipecat-homeassistant/actions/workflows/publish.yml/badge.svg">
-  </a>
-  <a href="https://github.com/kyvaith/pipecat-homeassistant/releases">
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/kyvaith/pipecat-homeassistant?label=release">
+  <a href="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/publish.yml">
+    <img alt="Publish add-on image" src="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/publish.yml/badge.svg">
   </a>
   <a href="LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/kyvaith/pipecat-homeassistant">
+    <img alt="License" src="https://img.shields.io/github/license/virajpadte/pipecat-homeassistant-sarvam-ai">
   </a>
   <a href="https://www.home-assistant.io/">
     <img alt="Home Assistant" src="https://img.shields.io/badge/Home%20Assistant-add--on%20%2B%20integration-41BDF5?logo=homeassistant&logoColor=white">
   </a>
-  <a href="https://github.com/pipecat-ai/pipecat">
-    <img alt="Pipecat" src="https://img.shields.io/badge/Pipecat-realtime%20voice-111111">
+  <a href="https://www.sarvam.ai/">
+    <img alt="Sarvam AI" src="https://img.shields.io/badge/Sarvam%20AI-Marathi%20%26%20Indic%20languages-ff6a00">
   </a>
 </p>
 
-Pipecat Assist brings realtime, multimodal Pipecat assistants to Home
-Assistant. It lets you talk to speech-to-speech realtime models, build custom
-Pipecat pipelines from cloud and local AI services, and keep Home Assistant
-device control through MCP.
+Sarvam Assist is a slim, Marathi- and Indic-language-first voice assistant for
+Home Assistant, built on [Sarvam AI](https://www.sarvam.ai/)'s speech and
+language models. It is a focused fork of the original multi-provider
+[Pipecat Assist](https://github.com/kyvaith/pipecat-homeassistant) project -
+**not** a drop-in replacement and **not** planned to merge back upstream. If
+you want a general-purpose, bring-your-own-provider Pipecat runtime for Home
+Assistant, use the upstream project instead; this fork exists specifically to
+be small, Sarvam-focused, and easy to reason about.
 
-## What Pipecat Assist offers
+## What it is
 
-- **Realtime voice assistants** over WebRTC, with Gemini Live as the default
-  first-run speech-to-speech pipeline.
-- **Custom pipeline builder** for speech-to-speech and composed realtime flows:
-  mix STT, LLM, TTS, memory, web search, Home Assistant tools, and Pipecat
-  Flows in one runtime profile.
-- **Cloud provider integrations** for Gemini, OpenAI, Soniox, Deepgram,
-  Speechmatics, Cartesia, Gradium, ElevenLabs, Google Cloud TTS, AWS Bedrock,
-  AWS Nova Sonic, and OpenAI-compatible endpoints.
-- **Local AI options** through Ollama, local runtime endpoints, and custom
-  OpenAI-compatible services.
-- **Multiple MCP servers**, including the built-in Home Assistant MCP server,
-  the Home Assistant MCP add-on, and additional custom MCP endpoints.
-- **Visual Pipecat Flow editing** for composed realtime pipelines, including
-  conditional conversation graphs and MCP-backed tool calls.
-- **Audio debugging, session memory, and web search** as first-class runtime
-  features rather than hidden provider toggles.
-- **Home Assistant AI Tasks support** for generated data and image-generation
-  tasks, using dedicated image providers such as Google Imagen or fal.
+A fixed realtime voice pipeline: **Speech-to-text -> Model -> Home Assistant
+tools -> Text-to-speech**, with optional session memory and web search. There
+is no provider picker and no visual pipeline builder - one settings screen
+configures the whole thing.
+
+- **Speech-to-text and text-to-speech**: always Sarvam AI (`saaras`/`bulbul`),
+  tuned for Marathi and other Indic languages.
+- **The model**: Sarvam Cloud by default, or a Local (OpenAI-compatible)
+  endpoint - Ollama, vLLM, LM Studio, or a self-hosted Sarvam open-weight
+  model. See [Model: Sarvam Cloud vs. Local](#model-sarvam-cloud-vs-local)
+  below.
+- **Device control**: Home Assistant MCP through the Supervisor connection,
+  automatically - no separate MCP add-on or server to configure.
+- **Speaker voice**: pick a bulbul voice from a gender-labeled dropdown; a
+  matching Marathi first-person verb-form rule (feminine or masculine) is
+  added to the system prompt automatically. No manual prompt editing needed.
+- **Web search**: a direct tool call to [Tavily](https://tavily.com/)'s
+  search API - no second LLM call is used to do the searching.
+- **Session memory**: a short-lived, in-memory toggle so reconnecting doesn't
+  immediately lose conversational context.
 
 ## Where you can use it
 
-- **Pipecat Assist add-on UI**: a full-width assistant card for quick browser
-  testing and pipeline development.
-- **Lovelace dashboard card**: a dedicated WebRTC card with live transcript,
-  smooth scrolling, and the most responsive full-duplex conversation path.
-- **Home Assistant Assist**: the custom component exposes Pipecat Assist as
+- **Add-on UI**: a Talk button for quick browser testing of the live pipeline.
+- **Lovelace dashboard card**: a dedicated WebRTC card with a live transcript.
+- **Home Assistant Assist**: the custom component exposes Sarvam Assist as
   Conversation, Speech-to-text, and Text-to-speech.
-- **Home Assistant AI Tasks / AI Actions**: Pipecat Assist can be selected for
-  generated-data and image-generation tasks where your Home Assistant version
-  exposes AI Task entities.
-- **ESPHome voice satellites**: the included `va_pipecat` component provides
-  wake-word turns, live transcripts, deterministic UI phases, follow-up
-  conversation, and full-duplex barge-in over an authenticated raw-PCM
-  WebSocket.
-- **Pipecat ESP32 clients**: the existing SmallWebRTC `/api/offer` endpoint
+- **ESPHome voice satellites**: the bundled `va_pipecat` component provides
+  wake-word turns, live transcripts, follow-up conversation, and full-duplex
+  barge-in over an authenticated raw-PCM WebSocket.
+- **Standalone Pipecat ESP32 clients**: the SmallWebRTC `/api/offer` endpoint
   remains available for standalone `pipecat-esp32` firmware.
-
-The Home Assistant Assist path uses an advanced Pipecat Live Bridge so HA
-Assist can talk to speech-to-speech realtime assistants such as Gemini Live and
-OpenAI Realtime. Because HA Assist itself is still not a full-duplex WebRTC
-client, this bridge cannot provide true barge-in while the assistant is
-speaking. The Lovelace card and add-on assistant card remain the more
-responsive realtime experience.
 
 ## Installation
 
@@ -82,193 +72,99 @@ responsive realtime experience.
    Store > Repositories**:
 
    ```text
-   https://github.com/kyvaith/pipecat-homeassistant
+   https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai
    ```
 
 2. Add the same repository URL to **HACS > Custom repositories** as an
    **Integration**.
 
-3. Install the **Pipecat Assist** add-on/app from the Home Assistant add-on
-   store.
+3. Install the **Sarvam Assist** add-on from the Home Assistant add-on store.
+   It builds locally the first time, which can take a few minutes - check the
+   Supervisor log for progress.
 
-4. Install the **Pipecat Assist** custom component from HACS, then restart Home
+4. Install the **Sarvam Assist** custom component from HACS, then restart Home
    Assistant when HACS asks you to.
 
-5. Add the Pipecat Assist integration in **Settings > Devices & services**. The
-   integration should auto-detect the add-on URL; keep the detected value unless
-   you run the add-on in a custom network layout.
+5. Add the **Sarvam Assist** integration in **Settings > Devices & services**.
+   It should auto-detect the add-on URL through Supervisor.
 
-6. In **Settings > Voice assistants**, select **Pipecat Assist** in all three
-   categories:
+6. In **Settings > Voice assistants**, select **Sarvam Assist** for
+   Conversation, Speech-to-text, and Text-to-speech.
 
-   - Conversation agent / LLM
-   - Speech-to-text
-   - Text-to-speech
+7. Open the Sarvam Assist add-on UI and paste your Sarvam API key, pick a
+   voice and language, and confirm Home Assistant MCP shows connected.
 
-   Use the single Pipecat Assist language entry. The actual voice, language,
-   and provider settings are configured inside the add-on pipeline.
+8. Add the **Sarvam Assist** Lovelace card to a dashboard and start talking.
 
-7. Optional: where your Home Assistant version exposes **AI Tasks** or **AI
-   Actions**, select **Pipecat Assist** for LLM task handling, generated data,
-   and image generation. Configure **Integrations > Google Imagen** or
-   **Integrations > fal Image Generation** in the add-on, then choose the image
-   provider in **Runtime > Image task provider** when you want a specific
-   backend instead of the first enabled one.
+## Model: Sarvam Cloud vs. Local
 
-8. Open the Pipecat Assist add-on UI and configure a provider:
+The Model step has exactly two choices:
 
-   - Easiest start: create a Google AI Studio API key and paste it into
-     **Integrations > Google Gemini Live**.
-   - Advanced setup: create or edit a custom pipeline with your preferred cloud
-     providers, local AI endpoints, and MCP servers.
+- **Sarvam Cloud** (default): Sarvam's hosted chat completions API. Just an
+  API key.
+- **Local (OpenAI-compatible)**: point at any OpenAI-compatible chat
+  completions endpoint - a base URL, a model name, and an optional API key.
+  This covers:
+  - **Ollama**, **vLLM**, or **LM Studio** serving any model they support.
+  - A **self-hosted Sarvam open-weight model**, served through vLLM or
+    SGLang (both are explicitly supported per Sarvam's own model cards):
+    - [`sarvamai/sarvam-1`](https://huggingface.co/sarvamai/sarvam-1) - 2B
+      params, 10 Indic languages, community GGUF quantizations exist for
+      llama.cpp-style local inference.
+    - [`sarvamai/sarvam-30b`](https://huggingface.co/sarvamai/sarvam-30b) -
+      mixture-of-experts, 2.4B active parameters, GQA, Apache 2.0 license.
+    - [`sarvamai/sarvam-105b`](https://huggingface.co/sarvamai/sarvam-105b) -
+      mixture-of-experts with multi-head latent attention, Apache 2.0 license.
 
-9. Add the **Pipecat Assist** Lovelace card to a dashboard and start talking.
+  Sarvam's own release notes discuss running these on hardware like an H100,
+  an L40S, or even a MacBook Pro M3, but **Sarvam does not publish a minimum
+  VRAM figure** for any of them - this README won't invent one either. Check
+  the linked model cards and your runtime's (vLLM/SGLang/Ollama) own hardware
+  guidance before committing to a deployment size.
 
-## Screenshots
+  In Local mode, instructions are sent with role `system` directly (the same
+  as any standard OpenAI-compatible chat completion), and Home Assistant MCP
+  tool calling works the same as with Sarvam Cloud.
 
-![Pipecat Assist Lovelace card on a Home Assistant dashboard](docs/screenshots/lovelace-card-dashboard.png)
+STT and TTS are always Sarvam AI regardless of which Model source you pick -
+Local is a Model-step-only option.
 
-![Pipecat Assist add-on assistant card](docs/screenshots/addon-assistant-card.png)
+## Web search
 
-![Pipeline builder with realtime steps](docs/screenshots/pipeline-builder.png)
+Enable **Web search** in settings and paste a [Tavily](https://tavily.com/)
+API key. The assistant calls Tavily's search API directly as a tool when it
+decides a question needs current information - there's no extra LLM call
+involved in doing the search itself, which keeps latency down.
 
-![Integration catalog](docs/screenshots/integrations-catalog.png)
+## Speaker voice and the gender verb-form rule
 
-![Pipecat Flow editor](docs/screenshots/pipecat-flow-editor.png)
+Marathi (and several other Indic languages) mark the speaker's gender in
+first-person verb forms. Pick a bulbul voice from the gender-labeled dropdown
+and the assistant automatically gets a matching system rule, e.g. for a female
+voice: *"You are a woman; use feminine first-person Marathi verb forms (करते,
+शकते, सांगते, आले, केले), never masculine (करतो, शकतो, आलो)."* - and the
+masculine equivalent for a male voice. You don't need to edit the system
+prompt by hand for this.
 
-## Repository layout
+## Home Assistant MCP
 
-- `addons/pipecat_assist` - the Home Assistant app/add-on. It runs Pipecat,
-  exposes a configuration UI through Ingress, serves WebRTC and ESPHome
-  satellite transports, and connects to Home Assistant MCP.
-- `addons/pipecat_assist/ui-src` - the React source for the pipeline editor
-  shipped as static assets inside the add-on image.
-- `components/va_pipecat` - the ESPHome external component and its device-side
-  PCM transport.
-- `custom_components/pipecat_assist` - a Home Assistant integration that
-  exposes Pipecat Assist as Conversation, STT, TTS, AI Task entities, and the
-  Lovelace WebRTC card asset.
-- `.github/workflows` - CI and GHCR publishing workflows for multi-arch Home
-  Assistant images.
+Sarvam Assist uses Home Assistant's Model Context Protocol server through the
+Supervisor connection automatically (`homeassistant_api: true`) - there is no
+separate MCP add-on or custom MCP server to configure. Open the settings page
+and use **Test** to confirm the connection and see the available tool count.
 
-## Architecture
+At session start, the assistant loads the list of devices you've exposed to
+Assist (name, domain, area) into its system context, so it can match what you
+say - in Marathi, English, or mixed - to the right device without you ever
+hardcoding device names anywhere. If an action can't be matched to an exact
+device, the assistant asks one short clarifying question instead of saying
+"not found."
 
-```mermaid
-flowchart LR
-    ESPHome["ESPHome va_pipecat satellite"] -->|"PCM WebSocket /api/assist/esphome"| Addon["Pipecat Assist add-on"]
-    ESP32["Standalone Pipecat ESP32"] -->|"SmallWebRTC /api/offer"| Addon
-    Browser["HA Ingress UI"] --> Addon
-    HAConv["HA Assist bridge"] -->|"Conversation / STT / TTS HTTP bridge"| Addon
-    Lovelace["Lovelace card"] -->|"WebRTC /api/offer"| Addon
-    Addon -->|"Pipecat S2S"| Realtime["Gemini Live / OpenAI Realtime / AWS Nova Sonic"]
-    Addon -->|"Pipecat composed realtime"| Cascade["STT + LLM + TTS"]
-    Cascade --> Flow["Pipecat Flows"]
-    Addon -->|"Streamable HTTP /api/mcp"| HAMCP["Home Assistant MCP Server"]
-    HAMCP --> Assist["HA Assist APIs and exposed entities"]
-```
-
-## Quick start after installation
-
-1. Start the add-on and open the web UI.
-2. Open **Integrations > Home Assistant MCP** and click **Test MCP**. In a
-   normal Home Assistant add-on install, Pipecat Assist uses the Supervisor
-   token automatically.
-3. Configure model providers. Gemini Live is the default, and additional
-   providers such as OpenAI, Soniox, Deepgram, Cartesia, Gradium, Speechmatics,
-   AWS, ElevenLabs, Google Cloud TTS HTTP fallback/Streaming,
-   OpenAI-compatible endpoints, Ollama, local runtimes, and Web Search can be
-   added from **Integrations**.
-4. Choose or create a pipeline. The built-in catalog includes realtime
-   speech-to-speech profiles and composed realtime profiles such as
-   `Soniox + OpenAI + Cartesia`, `Deepgram + Gemini + Google TTS`, and
-   `Speechmatics + AWS Nova Pro + ElevenLabs`.
-5. For ESPHome, add the bundled `va_pipecat` external component and enable
-   `api.custom_services`. The add-on discovers and provisions the satellite
-   automatically. **Runtime > ESPHome satellite** also exposes a manual
-   fallback endpoint.
-
-Home Assistant MCP access uses the add-on's Supervisor token by default. Use
-**Integrations > Home Assistant MCP > Automatic defaults** to clear custom MCP
-overrides and return to the Supervisor-backed defaults. Manually pasted
-long-lived access tokens are only needed for custom installations outside the
-Supervisor path.
-
-The optional **HA MCP Server Add-on** integration is detected automatically
-through the Home Assistant Supervisor API. Pipecat Assist reads the add-on's
-generated secret MCP URL and does not require a Bearer token for this
-integration. Use Bearer tokens only for custom MCP servers that explicitly
-require one.
-
-Gemini Live is the default first-run pipeline. Add a Google AI Studio key in
-**Integrations > Google Gemini Live**, keep
-`models/gemini-3.1-flash-live-preview` as the realtime model, and use
-**Assistant > Start voice test** to verify the browser voice path. The Home
-Assistant Assist bridge is best-effort compatibility with the classic HA
-Assist path; configure a composed pipeline for STT/TTS, install
-`custom_components/pipecat_assist`, add the **Pipecat Assist** integration, and
-select **Pipecat Assist** for Conversation, Speech-to-text, and Text-to-speech.
-
-## Pipelines and Pipecat Flows
-
-Pipecat Assist supports two realtime runtime families:
-
-- **Speech-to-speech realtime**: Gemini Live, OpenAI Realtime, and AWS Nova
-  Sonic take audio in and return audio directly. These are the lowest-friction
-  profiles and Gemini Live remains the first-run default.
-- **Composed realtime**: streaming STT, streaming LLM, and streaming TTS are
-  chained by Pipecat. These pipelines are still realtime over WebRTC, but each
-  stage can use a different provider. Compatible TTS providers can synthesize
-  streamed LLM output in sentence or token chunks.
-
-Provider integrations are intentionally split by capability. OpenAI Realtime
-and Gemini Live are speech-to-speech providers; OpenAI Cloud and Google Gemini
-Cloud are composed/text providers. Session Memory and Web Search are separate
-pipeline steps. Web Search selects a cloud LLM provider such as OpenAI Cloud or
-Google Gemini Cloud, while Home Assistant device control remains on MCP.
-
-Official `pipecat-ai-flows` support is enabled for composed realtime pipelines.
-The flow editor stores nodes, transition functions, JSON schemas, and optional
-Home Assistant MCP tool calls. For speech-to-speech services, the UI disables
-the Pipecat Flow tile because Pipecat Flows does not currently support Gemini
-Live or OpenAI Realtime S2S APIs.
-
-## Home Assistant Assist and Lovelace
-
-The custom component exposes Pipecat Assist in all three Home Assistant Assist
-slots: Conversation, Speech-to-text, and Text-to-speech. Select the single
-`pipecat-assist` language entry; the actual spoken language and voice remain
-configured in the add-on pipeline and provider integrations. The HA Assist
-bridge is not full-duplex like the Pipecat WebRTC path, but it lets standard HA
-Assist entry points call the active Pipecat pipeline where the provider supports
-the requested bridge operation.
-
-The Lovelace card is served by the integration at
-`/pipecat_assist/pipecat-assist-card.js`, is loaded automatically by the custom
-component, and uses the same WebRTC assistant path as the add-on demo. It calls
-the custom component proxy by default, so dashboard YAML does not need an
-Ingress token or flow ID.
-
-Useful card options:
-
-```yaml
-type: custom:pipecat-assist-card
-name: Pipecat Assist
-animation_on_idle: true
-compact_mode: false
-accent_color: "#206cff"
-audio_buffer_ms: 120
-```
-
-`compact_mode` hides the transcript. `audio_buffer_ms` hints the browser WebRTC
-jitter buffer; higher values can smooth playback with a small latency tradeoff.
-
-## Audio debugging
-
-Open **Runtime**, enable **Record audio in/out**, save, and then
-run the browser voice test or connect a satellite. The add-on writes separate
-WAV files for microphone input and assistant output under `/data/audio-debug`
-and exposes download links in the Runtime panel. Use **Clear** after debugging,
-because these files may contain private household audio.
+For "turn off/on all lights" style requests, the assistant prefers a single
+domain-wide call when turning things off, falls back to one call per device
+when turning things on (Home Assistant has no built-in "turn on everything"
+intent), also matches `switch` entities named like a lamp/light, and confirms
+out loud exactly what changed.
 
 ## ESPHome satellites
 
@@ -276,7 +172,7 @@ The repository includes the `va_pipecat` ESPHome external component:
 
 ```yaml
 external_components:
-  - source: github://kyvaith/pipecat-homeassistant@dev
+  - source: github://virajpadte/pipecat-homeassistant-sarvam-ai@sarvam-support
     components: [va_pipecat]
 
 api:
@@ -292,8 +188,8 @@ va_pipecat:
   barge_in: true
 ```
 
-The add-on resolves the Home Assistant LAN host and sends the authenticated URL
-through the device's native API action. No token-bearing text entity is
+The add-on resolves the Home Assistant LAN host and sends the authenticated
+URL through the device's native API action - no token-bearing text entity is
 created. See [the component reference](components/va_pipecat/README.md) and
 [architecture notes](docs/architecture/esphome-satellite.md) for the full
 configuration and conversation lifecycle.
@@ -301,22 +197,61 @@ configuration and conversation lifecycle.
 Standalone `pipecat-esp32` clients remain supported through the SmallWebRTC
 `/api/offer` endpoint.
 
-## Vision services
+## Migrating from an older Pipecat Assist install
 
-Moondream is a Pipecat vision service for image understanding and visual
-question answering, not a text-to-image generator. It is therefore not exposed
-as a Home Assistant image-generation backend in this release, but it is a good
-candidate for future AI Tasks that analyze image attachments.
+If you're upgrading from a pre-Sarvam-only build of this add-on:
+
+- Your Sarvam API key, STT/LLM/TTS models, voice, and language carry over
+  automatically - nothing to re-enter.
+- Your custom instructions and greeting text carry over automatically too.
+- Any other provider you had configured (Gemini, OpenAI, Deepgram, etc.) is
+  dropped, since those providers no longer exist in this build.
+- The Home Assistant integration's domain changed from `pipecat_assist` to
+  `sarvam_assist` - remove the old integration entry and add **Sarvam Assist**
+  again once (any automations/scripts referencing old `pipecat_assist.*`
+  entity IDs will need updating to the new `sarvam_assist.*` ones).
+- Any Lovelace dashboard using `custom:pipecat-assist-card` needs to be
+  changed to `custom:sarvam-assist-card`.
+
+## Repository layout
+
+- `addons/pipecat_assist` - the Home Assistant add-on (directory name kept for
+  continuity; the add-on itself is named and slugged "Sarvam Assist"). It runs
+  the fixed pipeline, serves the settings UI through Ingress, exposes WebRTC
+  and ESPHome satellite transports, and connects to Home Assistant MCP.
+- `addons/pipecat_assist/ui-src` - the React source for the settings UI,
+  shipped as static assets inside the add-on image.
+- `components/va_pipecat` - the ESPHome external component and its device-side
+  PCM transport.
+- `custom_components/sarvam_assist` - the Home Assistant integration exposing
+  Sarvam Assist as Conversation, STT, TTS, AI Task entities, and the Lovelace
+  WebRTC card asset.
+- `.github/workflows` - CI and GHCR publishing workflows for multi-arch Home
+  Assistant images.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    ESPHome["ESPHome va_pipecat satellite"] -->|"PCM WebSocket /api/assist/esphome"| Addon["Sarvam Assist add-on"]
+    ESP32["Standalone Pipecat ESP32"] -->|"SmallWebRTC /api/offer"| Addon
+    Browser["HA Ingress settings UI"] --> Addon
+    HAConv["HA Assist bridge"] -->|"Conversation / STT / TTS HTTP bridge"| Addon
+    Lovelace["Lovelace card"] -->|"WebRTC /api/offer"| Addon
+    Addon -->|"STT + LLM + TTS"| Pipeline["Sarvam STT -> Model -> Tools -> Sarvam TTS"]
+    Pipeline -->|"Sarvam Cloud or Local"| Model["Sarvam Cloud / Local OpenAI-compatible"]
+    Pipeline -->|"direct tool call"| Tavily["Tavily web search"]
+    Addon -->|"Streamable HTTP /api/mcp"| HAMCP["Home Assistant MCP (Supervisor)"]
+    HAMCP --> Assist["HA Assist APIs and exposed entities"]
+```
 
 ## Development
 
-The add-on source is in `addons/pipecat_assist`.
-
 ```bash
-python -m compileall addons/pipecat_assist/app custom_components/pipecat_assist
+python -m compileall addons/pipecat_assist/app custom_components/sarvam_assist
 ```
 
-For the React UI:
+For the settings UI:
 
 ```bash
 cd addons/pipecat_assist/ui-src
@@ -327,17 +262,17 @@ pnpm build
 For a container build:
 
 ```bash
-docker build -t pipecat-assist:dev addons/pipecat_assist
+docker build -t sarvam-assist:dev addons/pipecat_assist
 ```
 
 ## References
 
+- Sarvam AI docs: https://docs.sarvam.ai/
+- Sarvam open-weight models: https://huggingface.co/sarvamai
+- Tavily search API: https://docs.tavily.com/
 - Pipecat: https://github.com/pipecat-ai/pipecat
-- Pipecat Flows: https://github.com/pipecat-ai/pipecat-flows
-- Pipecat Flows Editor: https://github.com/pipecat-ai/pipecat-flows-editor
 - Pipecat ESP32: https://github.com/pipecat-ai/pipecat-esp32
-- Pipecat Google image generation: https://docs.pipecat.ai/api-reference/server/services/image-generation/google
-- Pipecat fal image generation: https://docs.pipecat.ai/api-reference/server/services/image-generation/fal
-- Pipecat Moondream vision service: https://docs.pipecat.ai/api-reference/server/services/vision/moondream
 - Home Assistant MCP server: https://www.home-assistant.io/integrations/mcp_server/
 - Home Assistant app docs: https://developers.home-assistant.io/docs/apps/configuration/
+- Upstream (general-purpose, multi-provider) project this was forked from:
+  https://github.com/kyvaith/pipecat-homeassistant
