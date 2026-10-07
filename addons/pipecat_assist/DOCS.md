@@ -285,3 +285,10 @@ then `sarvam_assist`, and is now `vaani`), so you will need to:
 - **Local model not responding**: confirm the base URL is reachable from
   inside the add-on's container (not just your browser), and that the model
   name matches exactly what your local server has loaded.
+- **Settings disappeared after an update**: use **Update**, not
+  **Uninstall** followed by reinstalling - Supervisor only wipes the
+  add-on's persistent `/data` (your Sarvam API key, voice, language,
+  instructions) on an explicit uninstall; a normal update never touches it.
+  If you see an add-on identifier like `<hash>_sarvam_assist` in the
+  Supervisor log during what looked like a routine update, that's this: a
+  full remove-then-reinstall cycle happened rather than an in-place update.

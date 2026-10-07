@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.3
+
+- Stopped using the deprecated `build.yaml` (Supervisor warned: "App
+  ...uses build.yaml which is deprecated. Move build parameters into the
+  Dockerfile directly."). The per-architecture base image is now selected
+  directly in the Dockerfile via buildx's own `TARGETARCH`, with no
+  Supervisor-injected `BUILD_FROM` build-arg involved. Verified real builds
+  for both amd64 and aarch64, plus the legacy-amd64 numpy-constraint path.
+- Documented the difference between **Update** (never touches persisted
+  settings) and **Uninstall then reinstall** (wipes `/data`) in
+  Troubleshooting, after a live install log showed exactly this sequence
+  happening.
+
 ## 1.0.2
 
 - Fixed the install-time disclaimer, which told users to "click into the

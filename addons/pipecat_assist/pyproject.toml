@@ -1,6 +1,6 @@
 [project]
 name = "vaani"
-version = "1.0.2"
+version = "1.0.3"
 description = "Vaani: an Indic-language Home Assistant voice assistant powered by Sarvam AI"
 requires-python = ">=3.11,<3.14"
 dependencies = [

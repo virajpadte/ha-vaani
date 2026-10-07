@@ -68,8 +68,6 @@ jobs:
         uses: home-assistant/builder/actions/build-image@2026.06.0
         with:
           arch: ${{ matrix.arch }}
-          build-args: |
-            BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base-debian:bookworm
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           context: addons/pipecat_assist
           cosign: "true"
@@ -142,7 +140,6 @@ jobs:
         with:
           arch: amd64
           build-args: |
-            BUILD_FROM=ghcr.io/home-assistant/amd64-base-debian:bookworm
             LEGACY_AMD64_NUMPY=true
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           context: addons/pipecat_assist

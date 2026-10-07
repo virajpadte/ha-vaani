@@ -1,5 +1,13 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base-debian:bookworm
-FROM ${BUILD_FROM}
+# Per-arch Home Assistant base images, selected below via buildx's own TARGETARCH (set
+# automatically from --platform) rather than a Supervisor-injected BUILD_FROM build-arg -
+# build.yaml/BUILD_FROM injection is deprecated by Supervisor as of 2026.04.0. The stage
+# names intentionally use Docker's "amd64"/"arm64" spelling (not HA's own "aarch64"), since
+# that is what TARGETARCH actually resolves to.
+FROM ghcr.io/home-assistant/amd64-base-debian:bookworm AS base-amd64
+FROM ghcr.io/home-assistant/aarch64-base-debian:bookworm AS base-arm64
+
+ARG TARGETARCH
+FROM base-${TARGETARCH} AS base
 
 ARG BUILD_VERSION=0.1.0
 ARG BUILD_ARCH=amd64
