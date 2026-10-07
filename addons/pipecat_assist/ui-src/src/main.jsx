@@ -3064,6 +3064,22 @@ function PipelineView({
                   onChange={(event) => updateFlow((draft) => ({ ...draft, greeting: event.target.value }))}
                 />
               </Field>
+              <Field label="Reasoning effort">
+                <select
+                  value={flow.reasoning_effort || ""}
+                  onChange={(event) => updateFlow((draft) => ({ ...draft, reasoning_effort: event.target.value || "" }))}
+                >
+                  <option value="">Off (fastest)</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </Field>
+              <div className="empty-state wide">
+                Sarvam's LLM reasons by default even at "Off" unless explicitly disabled — this
+                add-on sends that explicitly, so "Off" is the lowest-latency choice. Ignored by
+                providers that don't support it.
+              </div>
             </div>
           </>
         )}
@@ -4407,13 +4423,38 @@ function IntegrationSettings({
     return (
       <SettingsSection title={kindLabel(integration.kind)} status={secretStatus(integration, "api_key")}>
         <SecretSetting integration={integration} field="api_key" label="API key" updateIntegration={updateIntegration} />
-        <TextSetting integration={integration} field="default_model" label="LLM model" updateIntegration={updateIntegration} />
-        <TextSetting integration={integration} field="default_stt_model" label="STT model" updateIntegration={updateIntegration} />
-        <TextSetting integration={integration} field="default_tts_model" label="TTS model" updateIntegration={updateIntegration} />
+        <ModelSetting
+          integration={integration}
+          field="default_model"
+          label="LLM model"
+          updateIntegration={updateIntegration}
+          modelOptions={modelOptions}
+          loadModelOptions={loadModelOptions}
+          capability="llm"
+        />
+        <ModelSetting
+          integration={integration}
+          field="default_stt_model"
+          label="STT model"
+          updateIntegration={updateIntegration}
+          modelOptions={modelOptions}
+          loadModelOptions={loadModelOptions}
+          capability="stt"
+        />
+        <ModelSetting
+          integration={integration}
+          field="default_tts_model"
+          label="TTS model"
+          updateIntegration={updateIntegration}
+          modelOptions={modelOptions}
+          loadModelOptions={loadModelOptions}
+          capability="tts"
+        />
         <TextSetting integration={integration} field="default_voice" label="Speaker" updateIntegration={updateIntegration} />
         <div className="empty-state wide">
-          Language should be a Sarvam BCP-47 code, e.g. en-IN, hi-IN, mr-IN, ta-IN.
-          LLM model must be one of: sarvam-30b, sarvam-30b-16k, sarvam-105b, sarvam-105b-32k.
+          Language should be a Sarvam BCP-47 code, e.g. en-IN, hi-IN, mr-IN, ta-IN. This one
+          integration covers STT, TTS, and the Model/LLM step — no separate OpenAI-compatible
+          entry needed. Reasoning effort for the LLM is set on the pipeline, not here.
         </div>
       </SettingsSection>
     );

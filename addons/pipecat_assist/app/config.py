@@ -55,7 +55,7 @@ DEFAULT_SPEECHMATICS_MODEL = "enhanced"
 DEFAULT_SARVAM_STT_MODEL = "saaras:v3"
 DEFAULT_SARVAM_TTS_MODEL = "bulbul:v3"
 DEFAULT_SARVAM_TTS_VOICE = "shubh"
-DEFAULT_SARVAM_LLM_MODEL = "sarvam-30b"
+DEFAULT_SARVAM_LLM_MODEL = "sarvam-105b-conversations"
 DEFAULT_SARVAM_LANGUAGE = "en-IN"
 DEFAULT_GOOGLE_IMAGEN_MODEL = "imagen-4.0-generate-001"
 DEFAULT_FAL_IMAGE_MODEL = "fal-ai/fast-sdxl"
@@ -1296,7 +1296,7 @@ def _repair_provider_defaults(config: RuntimeConfig) -> bool:
         if not sarvam.language:
             sarvam.language = os.getenv("SARVAM_LANGUAGE", DEFAULT_SARVAM_LANGUAGE)
             changed = True
-        if not sarvam.default_model:
+        if not sarvam.default_model or sarvam.default_model in {"sarvam-30b", "sarvam-30b-16k"}:
             sarvam.default_model = os.getenv("SARVAM_LLM_MODEL", DEFAULT_SARVAM_LLM_MODEL)
             changed = True
         if not sarvam.default_stt_model or sarvam.default_stt_model == "saaras:v4":

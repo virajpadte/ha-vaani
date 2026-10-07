@@ -966,6 +966,13 @@ def _static_models_for(integration: IntegrationConfig, capability: str) -> list[
         values = [integration.default_realtime_model or DEFAULT_AWS_NOVA_SONIC_MODEL]
     elif integration.kind == "aws_bedrock":
         values = [integration.default_model or "amazon.nova-pro-v1:0"]
+    elif integration.kind == "sarvam":
+        if capability == "stt":
+            values = ["saaras:v3", "saaras:v2.5", "saarika:v2.5"]
+        elif capability == "tts":
+            values = ["bulbul:v3", "bulbul:v3-beta", "bulbul:v2"]
+        else:
+            values = ["sarvam-105b-conversations", "sarvam-105b"]
     else:
         values = [value for value in (integration.default_model, integration.default_realtime_model) if value]
     seen = set()
@@ -4666,6 +4673,10 @@ def _build_stt_service(
     integration = _require_integration(integration, "STT", fields=())
     model = _step_model_for(step, integration, "stt")
     language = _runtime_language(flow, integration, language_override)
+    if integration.kind == "sarvam":
+        # Sarvam's language is a fixed pipeline setting, not something a
+        # client-sent locale hint should be able to override.
+        language = (integration.language or DEFAULT_SARVAM_LANGUAGE).strip()
     logger.info(
         "Building composed STT service integration={} kind={} model={} language={}",
         integration.name,
@@ -4716,12 +4727,11 @@ def _build_stt_service(
     if integration.kind == "sarvam":
         from pipecat.services.sarvam.stt import SarvamSTTService
 
-        sarvam_language = (integration.language or DEFAULT_SARVAM_LANGUAGE).strip()
         return SarvamSTTService(
             api_key=_integration_api_key(integration, "STT"),
             settings=SarvamSTTService.Settings(
                 model=model or DEFAULT_SARVAM_STT_MODEL,
-                language=sarvam_language,
+                language=language,
             ),
         )
 
@@ -4807,11 +4817,15 @@ def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=Non
             ),
         )
     if integration.kind == "sarvam":
-        from pipecat.services.sarvam.llm import SarvamLLMService
+        from app.sarvam_llm import SarvamLLMService
 
+        sarvam_reasoning_effort = (
+            flow.reasoning_effort if flow.reasoning_effort in {"low", "medium", "high"} else None
+        )
         settings_kwargs: dict[str, Any] = {
             "model": model or DEFAULT_SARVAM_LLM_MODEL,
             "system_instruction": _effective_instructions(flow),
+            "reasoning_effort": sarvam_reasoning_effort,
         }
         if flow.max_output_tokens:
             settings_kwargs["max_tokens"] = flow.max_output_tokens
