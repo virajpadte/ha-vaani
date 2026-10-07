@@ -5915,7 +5915,11 @@ function VoiceTest({ config, flow }) {
               </div>
             ))
           ) : (
-            <div className="assistant-card-transcript-placeholder">{assistantCardT("greeting")}</div>
+            <div
+              className={state === "error" ? "assistant-card-transcript-placeholder error" : "assistant-card-transcript-placeholder"}
+            >
+              {state === "idle" ? assistantCardT("greeting") : detail}
+            </div>
           )}
         </div>
       </div>

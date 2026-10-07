@@ -550,6 +550,10 @@ h3 {
   text-shadow: 0 1px 18px rgba(0, 0, 0, 0.45);
 }
 
+.assistant-card-transcript-placeholder.error {
+  color: #ffb3ab;
+}
+
 .assistant-card-transcript-msg {
   max-width: 92%;
   border: 0;
