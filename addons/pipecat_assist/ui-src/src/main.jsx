@@ -644,6 +644,16 @@ const stepProviders = {
 };
 const runtimeStepOrder = ["transport", "memory", "vad", "stt", "llm", "web_search", "tools", "flow", "tts", "output"];
 
+function defaultInsertIndex(steps, kind) {
+  const kindOrder = runtimeStepOrder.indexOf(kind);
+  if (kindOrder === -1) return steps.length;
+  const index = steps.findIndex((step) => {
+    const order = runtimeStepOrder.indexOf(step.kind);
+    return order !== -1 && order > kindOrder;
+  });
+  return index === -1 ? steps.length : index;
+}
+
 function allowedProvidersForStep(kind, mode) {
   if (kind === "llm" && mode === "realtime") return ["gemini", "openai", "aws_nova_sonic"];
   if (kind === "output" && mode === "composed") return [];
@@ -2098,7 +2108,7 @@ function App() {
     setSelectedStepId(selectedFlow.steps.find((step) => step.id !== stepId)?.id || "");
   }
 
-  function insertStep(kind, index = selectedFlow.steps.length) {
+  function insertStep(kind, index = defaultInsertIndex(selectedFlow.steps, kind)) {
     if (kind === "flow" && deriveFlowMode(selectedFlow, config) === "realtime") {
       setMessage({ text: "Pipecat Flow can only be added to composed realtime pipelines.", tone: "error" });
       return;
