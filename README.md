@@ -83,8 +83,17 @@ configures the whole thing.
    **Integration**.
 
 3. Install the **Vaani** add-on from the Home Assistant add-on store.
-   It builds locally the first time, which can take a few minutes - check the
-   Supervisor log for progress.
+
+   > **This install is slow - that's expected, not stuck.** No pre-built
+   > image is published, so every install/update compiles the add-on from
+   > source on your own hardware: system packages, then a genuinely heavy
+   > Python dependency tree (numpy, numba, onnxruntime, scipy, aiortc,
+   > opencv) needed for realtime audio/WebRTC. Budget **5-10 minutes on a
+   > typical x86 machine, and up to 15-20+ minutes on a Raspberry Pi** or
+   > other ARM hardware, especially on first install. Click into the
+   > install progress (or **Settings > System > Logs > Supervisor**) to
+   > watch the live build log - it's staged with `[1/4]` through `[4/4]` markers
+   > so you can see it actually progressing rather than hanging.
 
 4. Install the **Vaani** custom component from HACS, then restart Home
    Assistant when HACS asks you to.

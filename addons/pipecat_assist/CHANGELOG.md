@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.1
+
+- Added staged `[1/4]`-`[4/4]` progress banners to the Docker build so
+  Supervisor's live install/update log shows clear checkpoints instead of
+  an unexplained wall of apt/pip output, and documented realistic install
+  time expectations (5-10 min on x86, 15-20+ min on ARM/Raspberry Pi) in
+  the README/DOCS - no pre-built image is published, so every install
+  builds from source on the user's own hardware.
+
+## 1.0.0
+
+- Reset the add-on and integration version numbers to 1.0.0. The previous
+  0.1.9x/0.1.8x numbers were inherited from the long pre-rename iteration
+  history and misrepresented Vaani as a deeply pre-release project rather
+  than the complete rewrite it now is.
+
 ## 0.1.93
 
 - Renamed the add-on's display name and the Home Assistant integration to

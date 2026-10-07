@@ -16,6 +16,26 @@ Sarvam AI; only the Model step has a choice (Sarvam Cloud or Local).
 - A reachable LAN IP for Home Assistant if ESP32 satellites will connect.
 - Optionally, a [Tavily](https://tavily.com/) API key for web search.
 
+## Install/update time
+
+No pre-built image is published for this add-on, so every install and every
+update **builds the image from source on your own Home Assistant hardware**:
+system packages (ffmpeg, build tools) first, then a genuinely heavy Python
+dependency tree required for realtime audio/WebRTC - numpy, numba,
+onnxruntime, scipy, aiortc, opencv. That's slow by nature, not a sign
+something's wrong:
+
+- Typical x86 hardware: **5-10 minutes**.
+- Raspberry Pi or other ARM hardware: **15-20+ minutes**, more on first
+  install if any dependency has to compile from source instead of using a
+  pre-built wheel.
+
+To watch it happen instead of wondering if it's frozen: click into the
+add-on's install/update progress, or go to **Settings > System > Logs >
+Supervisor**. The build log is staged with `[1/4]` through `[4/4]` banners
+(system packages -> Python dependencies -> app copy -> done) so you can see
+concrete progress rather than a wall of unexplained `pip` output.
+
 ## Configuration
 
 Most settings live in the Vaani settings UI, not in Home Assistant
