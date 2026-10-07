@@ -126,5 +126,61 @@ class ConfigMigrationTests(unittest.TestCase):
             self.assertEqual(first.flows[0].instructions, second.flows[0].instructions)
 
 
+class VoiceModelCompatibilityRepairTests(unittest.TestCase):
+    """Regression tests for a real production bug: a saved voice from one bulbul model
+    paired with a different model, which Sarvam's TTS API rejects outright with HTTP 400,
+    producing no audio."""
+
+    def _payload_with_voice(self, model: str, voice: str) -> dict:
+        payload = _old_shape_payload()
+        sarvam = next(item for item in payload["integrations"] if item["id"] == "sarvam")
+        sarvam["default_tts_model"] = model
+        sarvam["default_voice"] = voice
+        return payload
+
+    def test_v2_only_voice_saved_against_v3_model_is_repaired(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pipecat_assist.json"
+            path.write_text(
+                json.dumps(self._payload_with_voice("bulbul:v3", "vidya")), encoding="utf-8"
+            )
+
+            config = ConfigStore(path).load()
+
+            sarvam = config.integration("sarvam")
+            self.assertNotEqual(sarvam.default_voice, "vidya")
+
+            from app.sarvam_voices import speakers_for_model
+
+            self.assertIn(sarvam.default_voice, speakers_for_model("bulbul:v3"))
+
+    def test_v3_only_voice_saved_against_v2_model_is_repaired(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pipecat_assist.json"
+            path.write_text(
+                json.dumps(self._payload_with_voice("bulbul:v2", "ishita")), encoding="utf-8"
+            )
+
+            config = ConfigStore(path).load()
+
+            sarvam = config.integration("sarvam")
+            self.assertNotEqual(sarvam.default_voice, "ishita")
+
+            from app.sarvam_voices import speakers_for_model
+
+            self.assertIn(sarvam.default_voice, speakers_for_model("bulbul:v2"))
+
+    def test_already_compatible_voice_is_left_untouched(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pipecat_assist.json"
+            path.write_text(
+                json.dumps(self._payload_with_voice("bulbul:v3", "ishita")), encoding="utf-8"
+            )
+
+            config = ConfigStore(path).load()
+
+            self.assertEqual(config.integration("sarvam").default_voice, "ishita")
+
+
 if __name__ == "__main__":
     unittest.main()

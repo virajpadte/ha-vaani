@@ -1,6 +1,6 @@
 [project]
 name = "sarvam-assist"
-version = "0.1.90"
+version = "0.1.91"
 description = "Sarvam Assist: a Marathi/Indic-language Home Assistant voice assistant powered by Sarvam AI"
 requires-python = ">=3.11,<3.14"
 dependencies = [

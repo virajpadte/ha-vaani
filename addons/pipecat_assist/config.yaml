@@ -1,5 +1,5 @@
 name: Sarvam Assist
-version: "0.1.90"
+version: "0.1.91"
 slug: sarvam_assist
 description: Marathi and Indic-language Home Assistant voice assistant powered by Sarvam AI, with Home Assistant MCP device control and ESP32 satellite support.
 url: https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai

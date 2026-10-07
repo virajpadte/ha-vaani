@@ -554,28 +554,36 @@ async def api_integration_models(integration_id: str, capability: str = "llm"):
     return {"ok": False, "models": fallback}
 
 
-def _voices_for_integration(integration: IntegrationConfig) -> list[dict[str, str]]:
-    """Return TTS speaker voices for an integration, grouped by gender when known."""
+def _voices_for_integration(integration: IntegrationConfig, model: str = "") -> list[dict[str, str]]:
+    """Return TTS speaker voices for an integration, grouped by gender when known.
+
+    Filtered to the speakers Sarvam actually accepts for the given (or integration's
+    configured) TTS model - bulbul:v2 and bulbul:v3/v3-beta have different, non-overlapping
+    speaker sets, and Sarvam's API rejects a mismatched pairing with an HTTP 400.
+    """
 
     if integration.kind != "sarvam":
         return []
 
-    from app.sarvam_voices import FEMALE_SPEAKERS, MALE_SPEAKERS
+    from app.sarvam_voices import FEMALE_SPEAKERS, MALE_SPEAKERS, speakers_for_model
 
+    valid = speakers_for_model(model or integration.default_tts_model)
     return [
-        {"id": name, "label": name.capitalize(), "gender": "female"} for name in sorted(FEMALE_SPEAKERS)
+        {"id": name, "label": name.capitalize(), "gender": "female"}
+        for name in sorted(FEMALE_SPEAKERS & valid)
     ] + [
-        {"id": name, "label": name.capitalize(), "gender": "male"} for name in sorted(MALE_SPEAKERS)
+        {"id": name, "label": name.capitalize(), "gender": "male"}
+        for name in sorted(MALE_SPEAKERS & valid)
     ]
 
 
 @app.get("/api/assist/integrations/{integration_id}/voices")
-async def api_integration_voices(integration_id: str):
+async def api_integration_voices(integration_id: str, model: str = ""):
     config = STORE.load()
     integration = config.integration(integration_id)
     if not integration:
         raise HTTPException(status_code=404, detail="Integration not found")
-    return {"voices": _voices_for_integration(integration)}
+    return {"voices": _voices_for_integration(integration, model)}
 
 
 @app.post("/api/assist/mcp/check")

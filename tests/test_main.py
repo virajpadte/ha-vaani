@@ -160,6 +160,33 @@ class VoicesForIntegrationTests(unittest.TestCase):
         voices = main._voices_for_integration(config.integration("local"))
         self.assertEqual(voices, [])
 
+    def test_v2_only_voice_is_excluded_when_model_is_v3(self):
+        config, _flow = _config_with_llm_kind("sarvam")
+        integration = config.integration("sarvam")
+        integration.default_tts_model = "bulbul:v3"
+        voices = main._voices_for_integration(integration)
+        ids = {voice["id"] for voice in voices}
+        self.assertNotIn("vidya", ids)
+        self.assertIn("shubh", ids)
+
+    def test_v3_only_voice_is_excluded_when_model_is_v2(self):
+        config, _flow = _config_with_llm_kind("sarvam")
+        integration = config.integration("sarvam")
+        integration.default_tts_model = "bulbul:v2"
+        voices = main._voices_for_integration(integration)
+        ids = {voice["id"] for voice in voices}
+        self.assertIn("vidya", ids)
+        self.assertNotIn("shubh", ids)
+
+    def test_explicit_model_param_overrides_integration_default(self):
+        config, _flow = _config_with_llm_kind("sarvam")
+        integration = config.integration("sarvam")
+        integration.default_tts_model = "bulbul:v3"
+        voices = main._voices_for_integration(integration, model="bulbul:v2")
+        ids = {voice["id"] for voice in voices}
+        self.assertIn("vidya", ids)
+        self.assertNotIn("shubh", ids)
+
 
 if __name__ == "__main__":
     unittest.main()

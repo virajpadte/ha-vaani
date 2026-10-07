@@ -517,6 +517,20 @@ def _repair_provider_defaults(config: RuntimeConfig) -> bool:
         if not sarvam.default_voice:
             sarvam.default_voice = os.getenv("SARVAM_TTS_VOICE", DEFAULT_SARVAM_TTS_VOICE)
             changed = True
+        else:
+            from app.sarvam_voices import speakers_for_model
+
+            valid_voices = speakers_for_model(sarvam.default_tts_model)
+            if sarvam.default_voice.strip().lower() not in valid_voices:
+                # Sarvam's bulbul:v2 and bulbul:v3/v3-beta have disjoint speaker sets; a
+                # voice saved for one model 400s outright against the other. Fall back to
+                # the add-on default if it fits this model, else any valid speaker.
+                sarvam.default_voice = (
+                    DEFAULT_SARVAM_TTS_VOICE
+                    if DEFAULT_SARVAM_TTS_VOICE in valid_voices
+                    else next(iter(sorted(valid_voices)), "")
+                )
+                changed = True
 
     local = config.integration("local")
     if local:

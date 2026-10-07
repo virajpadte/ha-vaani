@@ -10,7 +10,13 @@ ADDON_ROOT = Path(__file__).resolve().parents[1] / "addons" / "pipecat_assist"
 if ADDON_ROOT.is_dir():
     sys.path.insert(0, str(ADDON_ROOT))
 
-from app.sarvam_voices import gender_instruction, speaker_gender  # noqa: E402
+from app.sarvam_voices import (  # noqa: E402
+    V2_SPEAKERS,
+    V3_SPEAKERS,
+    gender_instruction,
+    speaker_gender,
+    speakers_for_model,
+)
 
 
 class SpeakerGenderTests(unittest.TestCase):
@@ -61,6 +67,30 @@ class GenderInstructionTests(unittest.TestCase):
 
     def test_no_speaker_selected_returns_empty_string(self):
         self.assertEqual(gender_instruction(""), "")
+
+
+class SpeakersForModelTests(unittest.TestCase):
+    def test_v2_model_returns_only_v2_speakers(self):
+        self.assertEqual(speakers_for_model("bulbul:v2"), V2_SPEAKERS)
+
+    def test_v3_model_returns_only_v3_speakers(self):
+        self.assertEqual(speakers_for_model("bulbul:v3"), V3_SPEAKERS)
+
+    def test_v3_beta_model_also_returns_v3_speakers(self):
+        self.assertEqual(speakers_for_model("bulbul:v3-beta"), V3_SPEAKERS)
+
+    def test_empty_model_defaults_to_v3_speakers(self):
+        self.assertEqual(speakers_for_model(""), V3_SPEAKERS)
+
+    def test_v2_and_v3_speaker_sets_do_not_overlap(self):
+        self.assertEqual(V2_SPEAKERS & V3_SPEAKERS, set())
+
+    def test_vidya_is_v2_only_matching_sarvams_live_api_error(self):
+        # Regression test for a real production bug: a config saved voice="vidya" paired
+        # with model="bulbul:v3", which Sarvam's API rejects outright with an HTTP 400.
+        self.assertIn("vidya", V2_SPEAKERS)
+        self.assertNotIn("vidya", V3_SPEAKERS)
+        self.assertNotIn("vidya", speakers_for_model("bulbul:v3"))
 
 
 if __name__ == "__main__":
