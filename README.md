@@ -5,14 +5,14 @@
 # Vaani
 
 <p align="center">
-  <a href="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/ci.yml">
-    <img alt="CI" src="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/ci.yml/badge.svg?branch=main">
+  <a href="https://github.com/virajpadte/ha-vaani/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/virajpadte/ha-vaani/actions/workflows/ci.yml/badge.svg?branch=main">
   </a>
-  <a href="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/publish.yml">
-    <img alt="Publish add-on image" src="https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai/actions/workflows/publish.yml/badge.svg">
+  <a href="https://github.com/virajpadte/ha-vaani/actions/workflows/publish.yml">
+    <img alt="Publish add-on image" src="https://github.com/virajpadte/ha-vaani/actions/workflows/publish.yml/badge.svg">
   </a>
   <a href="LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/virajpadte/pipecat-homeassistant-sarvam-ai">
+    <img alt="License" src="https://img.shields.io/github/license/virajpadte/ha-vaani">
   </a>
   <a href="https://www.home-assistant.io/">
     <img alt="Home Assistant" src="https://img.shields.io/badge/Home%20Assistant-add--on%20%2B%20integration-41BDF5?logo=homeassistant&logoColor=white">
@@ -76,7 +76,7 @@ configures the whole thing.
    Store > Repositories**:
 
    ```text
-   https://github.com/virajpadte/pipecat-homeassistant-sarvam-ai
+   https://github.com/virajpadte/ha-vaani
    ```
 
 2. Add the same repository URL to **HACS > Custom repositories** as an
@@ -208,7 +208,7 @@ The repository includes the `va_pipecat` ESPHome external component:
 
 ```yaml
 external_components:
-  - source: github://virajpadte/pipecat-homeassistant-sarvam-ai@sarvam-support
+  - source: github://virajpadte/ha-vaani@main
     components: [va_pipecat]
 
 api:

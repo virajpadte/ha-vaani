@@ -205,7 +205,7 @@ device, then store the URL in ESPHome `secrets.yaml`.
 
 ```yaml
 external_components:
-  - source: github://virajpadte/pipecat-homeassistant-sarvam-ai@sarvam-support
+  - source: github://virajpadte/ha-vaani@main
     components: [va_pipecat]
 
 va_pipecat:
