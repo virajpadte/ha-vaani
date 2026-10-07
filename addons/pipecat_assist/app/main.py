@@ -81,6 +81,7 @@ from app.config import (
     DEFAULT_OPENAI_TTS_MODEL,
     DEFAULT_OPENAI_TTS_VOICE,
     DEFAULT_SARVAM_LANGUAGE,
+    DEFAULT_SARVAM_LLM_MODEL,
     DEFAULT_SARVAM_STT_MODEL,
     DEFAULT_SARVAM_TTS_MODEL,
     DEFAULT_SARVAM_TTS_VOICE,
@@ -4713,12 +4714,15 @@ def _build_stt_service(
             language=language,
         )
     if integration.kind == "sarvam":
-        from app.sarvam_services import SarvamSTTService
+        from pipecat.services.sarvam.stt import SarvamSTTService
 
+        sarvam_language = (integration.language or DEFAULT_SARVAM_LANGUAGE).strip()
         return SarvamSTTService(
             api_key=_integration_api_key(integration, "STT"),
-            model=model or DEFAULT_SARVAM_STT_MODEL,
-            language_code=language or None,
+            settings=SarvamSTTService.Settings(
+                model=model or DEFAULT_SARVAM_STT_MODEL,
+                language=sarvam_language,
+            ),
         )
 
     raise RuntimeError(f"STT provider {integration.kind} is not supported by composed runtime")
@@ -4801,6 +4805,19 @@ def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=Non
                 model=model or integration.default_model or "llama3.2",
                 system_instruction=_effective_instructions(flow),
             ),
+        )
+    if integration.kind == "sarvam":
+        from pipecat.services.sarvam.llm import SarvamLLMService
+
+        settings_kwargs: dict[str, Any] = {
+            "model": model or DEFAULT_SARVAM_LLM_MODEL,
+            "system_instruction": _effective_instructions(flow),
+        }
+        if flow.max_output_tokens:
+            settings_kwargs["max_tokens"] = flow.max_output_tokens
+        return SarvamLLMService(
+            api_key=_integration_api_key(integration, "LLM"),
+            settings=SarvamLLMService.Settings(**settings_kwargs),
         )
 
     raise RuntimeError(f"LLM provider {integration.kind} is not supported by composed runtime")
@@ -4896,14 +4913,18 @@ def _build_tts_service(config: RuntimeConfig, flow: FlowConfig):
             settings=SonioxTTSService.Settings(voice=voice or None),
         )
     if integration.kind == "sarvam":
-        from app.sarvam_services import SarvamTTSService
+        from pipecat.services.sarvam.tts import SarvamTTSService
 
+        sarvam_language = (integration.language or DEFAULT_SARVAM_LANGUAGE).strip()
         return SarvamTTSService(
             api_key=_integration_api_key(integration, "TTS"),
-            model=model or DEFAULT_SARVAM_TTS_MODEL,
-            voice=voice or DEFAULT_SARVAM_TTS_VOICE,
-            language_code=_runtime_language(flow, integration) or DEFAULT_SARVAM_LANGUAGE,
-            speed=speed,
+            text_aggregation_mode=text_aggregation_mode,
+            settings=SarvamTTSService.Settings(
+                model=model or DEFAULT_SARVAM_TTS_MODEL,
+                voice=voice or DEFAULT_SARVAM_TTS_VOICE,
+                language=sarvam_language,
+                pace=speed,
+            ),
         )
 
     raise RuntimeError(f"TTS provider {integration.kind} is not supported by composed runtime")

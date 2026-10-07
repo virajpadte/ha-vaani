@@ -636,7 +636,7 @@ const addableStepTypes = stepTypes.filter(([kind]) => !["transport", "output"].i
 
 const stepProviders = {
   stt: ["soniox", "deepgram", "speechmatics", "gradium", "openai_cloud", "sarvam"],
-  llm: ["openai_cloud", "gemini_cloud", "aws_bedrock", "openai_compatible", "ollama"],
+  llm: ["openai_cloud", "gemini_cloud", "aws_bedrock", "openai_compatible", "ollama", "sarvam"],
   tts: ["cartesia", "gradium", "google_cloud_tts", "google_streaming_tts", "elevenlabs", "openai_cloud", "soniox", "sarvam"],
   tools: ["home_assistant_mcp", "ha_mcp", "mcp_server"],
   web_search: ["web_search"],
@@ -4407,11 +4407,13 @@ function IntegrationSettings({
     return (
       <SettingsSection title={kindLabel(integration.kind)} status={secretStatus(integration, "api_key")}>
         <SecretSetting integration={integration} field="api_key" label="API key" updateIntegration={updateIntegration} />
+        <TextSetting integration={integration} field="default_model" label="LLM model" updateIntegration={updateIntegration} />
         <TextSetting integration={integration} field="default_stt_model" label="STT model" updateIntegration={updateIntegration} />
         <TextSetting integration={integration} field="default_tts_model" label="TTS model" updateIntegration={updateIntegration} />
         <TextSetting integration={integration} field="default_voice" label="Speaker" updateIntegration={updateIntegration} />
         <div className="empty-state wide">
-          Language should be a Sarvam BCP-47 code, e.g. en-IN, hi-IN, ta-IN.
+          Language should be a Sarvam BCP-47 code, e.g. en-IN, hi-IN, mr-IN, ta-IN.
+          LLM model must be one of: sarvam-30b, sarvam-30b-16k, sarvam-105b, sarvam-105b-32k.
         </div>
       </SettingsSection>
     );
