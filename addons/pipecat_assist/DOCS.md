@@ -30,11 +30,12 @@ something's wrong:
   install if any dependency has to compile from source instead of using a
   pre-built wheel.
 
-To watch it happen instead of wondering if it's frozen: click into the
-add-on's install/update progress, or go to **Settings > System > Logs >
-Supervisor**. The build log is staged with `[1/4]` through `[4/4]` banners
-(system packages -> Python dependencies -> app copy -> done) so you can see
-concrete progress rather than a wall of unexplained `pip` output.
+To watch it happen instead of wondering if it's frozen: go to
+**Settings > System > Logs**, then select **Supervisor** from the dropdown
+in the top-right corner. The build log is staged with `[1/4]` through
+`[4/4]` banners (system packages -> Python dependencies -> app copy -> done)
+so you can see concrete progress rather than a wall of unexplained `pip`
+output.
 
 ## Configuration
 

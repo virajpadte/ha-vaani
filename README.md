@@ -90,10 +90,11 @@ configures the whole thing.
    > Python dependency tree (numpy, numba, onnxruntime, scipy, aiortc,
    > opencv) needed for realtime audio/WebRTC. Budget **5-10 minutes on a
    > typical x86 machine, and up to 15-20+ minutes on a Raspberry Pi** or
-   > other ARM hardware, especially on first install. Click into the
-   > install progress (or **Settings > System > Logs > Supervisor**) to
-   > watch the live build log - it's staged with `[1/4]` through `[4/4]` markers
-   > so you can see it actually progressing rather than hanging.
+   > other ARM hardware, especially on first install. To watch it actually
+   > progressing instead of wondering if it's frozen: go to
+   > **Settings > System > Logs**, then pick **Supervisor** from the
+   > dropdown in the top-right corner. The build log is staged with
+   > `[1/4]` through `[4/4]` markers.
 
 4. Install the **Vaani** custom component from HACS, then restart Home
    Assistant when HACS asks you to.

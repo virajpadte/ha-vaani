@@ -17,9 +17,10 @@ there is no provider picker and no visual pipeline builder here, by design.
 > **Heads up: install/update is slow, and that's expected.** No pre-built
 > image is published, so this builds from source on your own hardware every
 > time - typically 5-10 minutes on x86, 15-20+ minutes on a Raspberry Pi or
-> other ARM device. Click into the install progress to watch the live build
-> log; it's staged with `[1/4]`-`[4/4]` markers so you can see it's actually
-> working, not stuck.
+> other ARM device. To watch it actually working instead of wondering if
+> it's frozen: go to **Settings > System > Logs**, then pick **Supervisor**
+> from the dropdown in the top-right corner. The build log is staged with
+> `[1/4]`-`[4/4]` markers.
 
 Open the settings UI after starting the add-on:
 

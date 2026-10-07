@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2
+
+- Fixed the install-time disclaimer, which told users to "click into the
+  install progress" without saying where - it now points precisely to
+  **Settings > System > Logs**, then **Supervisor** from the top-right
+  dropdown, the one documented, version-independent path to the live
+  build log.
+
 ## 1.0.1
 
 - Added staged `[1/4]`-`[4/4]` progress banners to the Docker build so
