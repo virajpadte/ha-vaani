@@ -505,6 +505,12 @@ def _repair_provider_defaults(config: RuntimeConfig) -> bool:
         if not sarvam.language:
             sarvam.language = os.getenv("SARVAM_LANGUAGE", DEFAULT_SARVAM_LANGUAGE)
             changed = True
+        else:
+            from app.sarvam_languages import SARVAM_LANGUAGE_CODES
+
+            if sarvam.language.strip() not in SARVAM_LANGUAGE_CODES:
+                sarvam.language = DEFAULT_SARVAM_LANGUAGE
+                changed = True
         if not sarvam.default_model or sarvam.default_model in {"sarvam-30b", "sarvam-30b-16k"}:
             sarvam.default_model = os.getenv("SARVAM_LLM_MODEL", DEFAULT_SARVAM_LLM_MODEL)
             changed = True

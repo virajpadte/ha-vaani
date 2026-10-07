@@ -91,8 +91,17 @@ def speaker_gender(voice: str) -> str | None:
     return None
 
 
-def gender_instruction(voice: str) -> str:
-    """Return the Marathi first-person verb-form rule for a speaker, or "" if unknown."""
+def gender_instruction(voice: str, language: str = "") -> str:
+    """Return the Marathi first-person verb-form rule for a speaker, or "" otherwise.
+
+    This rule's exact verb forms (करते/करतो etc.) are Marathi grammar - gender agreement
+    rules differ across Sarvam's other supported languages and are not stated here to
+    avoid asserting grammar that hasn't been verified. The rule is only ever returned when
+    the configured language is Marathi (mr-IN); other languages get no gender rule.
+    """
+
+    if not (language or "").strip().lower().startswith("mr"):
+        return ""
 
     gender = speaker_gender(voice)
     if gender == "female":

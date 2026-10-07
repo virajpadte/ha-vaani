@@ -18,11 +18,11 @@
     <img alt="Home Assistant" src="https://img.shields.io/badge/Home%20Assistant-add--on%20%2B%20integration-41BDF5?logo=homeassistant&logoColor=white">
   </a>
   <a href="https://www.sarvam.ai/">
-    <img alt="Sarvam AI" src="https://img.shields.io/badge/Sarvam%20AI-Marathi%20%26%20Indic%20languages-ff6a00">
+    <img alt="Sarvam AI" src="https://img.shields.io/badge/Sarvam%20AI-English%20%2B%2010%20Indic%20languages-ff6a00">
   </a>
 </p>
 
-Sarvam Assist is a slim, Marathi- and Indic-language-first voice assistant for
+Sarvam Assist is a slim, Indic-language voice assistant for
 Home Assistant, built on [Sarvam AI](https://www.sarvam.ai/)'s speech and
 language models. It is a focused fork of the original multi-provider
 [Pipecat Assist](https://github.com/kyvaith/pipecat-homeassistant) project -
@@ -38,17 +38,21 @@ tools -> Text-to-speech**, with optional session memory and web search. There
 is no provider picker and no visual pipeline builder - one settings screen
 configures the whole thing.
 
-- **Speech-to-text and text-to-speech**: always Sarvam AI (`saaras`/`bulbul`),
-  tuned for Marathi and other Indic languages.
+- **Speech-to-text and text-to-speech**: always Sarvam AI (`saaras`/`bulbul`).
+  Pick a language from a dropdown - English, Hindi, Marathi, Tamil, Telugu,
+  Bengali, Gujarati, Kannada, Malayalam, Odia, or Punjabi. One setting covers
+  both STT and TTS. See [Supported languages](#supported-languages).
 - **The model**: Sarvam Cloud by default, or a Local (OpenAI-compatible)
   endpoint - Ollama, vLLM, LM Studio, or a self-hosted Sarvam open-weight
   model. See [Model: Sarvam Cloud vs. Local](#model-sarvam-cloud-vs-local)
   below.
 - **Device control**: Home Assistant MCP through the Supervisor connection,
   automatically - no separate MCP add-on or server to configure.
-- **Speaker voice**: pick a bulbul voice from a gender-labeled dropdown; a
-  matching Marathi first-person verb-form rule (feminine or masculine) is
-  added to the system prompt automatically. No manual prompt editing needed.
+- **Speaker voice**: pick a bulbul voice from a gender-labeled dropdown; for
+  Marathi specifically, a matching first-person verb-form rule (feminine or
+  masculine) is added to the system prompt automatically - no manual prompt
+  editing needed. See [Speaker voice and the gender verb-form
+  rule](#speaker-voice-and-the-gender-verb-form-rule).
 - **Web search**: a direct tool call to [Tavily](https://tavily.com/)'s
   search API - no second LLM call is used to do the searching.
 - **Session memory**: a short-lived, in-memory toggle so reconnecting doesn't
@@ -129,6 +133,32 @@ The Model step has exactly two choices:
 STT and TTS are always Sarvam AI regardless of which Model source you pick -
 Local is a Model-step-only option.
 
+## Supported languages
+
+One **Language** setting covers both speech-to-text and text-to-speech, picked
+from a dropdown (no more hand-typing a BCP-47 code). This is the intersection
+of what Sarvam's STT and TTS APIs both accept - verified against
+[docs.sarvam.ai](https://docs.sarvam.ai/), not guessed:
+
+| Language | Code |
+|---|---|
+| English | `en-IN` |
+| Hindi | `hi-IN` |
+| Marathi | `mr-IN` |
+| Tamil | `ta-IN` |
+| Telugu | `te-IN` |
+| Bengali | `bn-IN` |
+| Gujarati | `gu-IN` |
+| Kannada | `kn-IN` |
+| Malayalam | `ml-IN` |
+| Odia | `od-IN` |
+| Punjabi | `pa-IN` |
+
+Sarvam's Speech-to-Text API alone accepts several more languages (Assamese,
+Urdu, Nepali, Sanskrit, and others), but since one Language setting here
+drives both STT and TTS, the list above - TTS's smaller set - is what's
+offered, so STT and TTS always agree.
+
 ## Web search
 
 Enable **Web search** in settings and paste a [Tavily](https://tavily.com/)
@@ -138,13 +168,19 @@ involved in doing the search itself, which keeps latency down.
 
 ## Speaker voice and the gender verb-form rule
 
-Marathi (and several other Indic languages) mark the speaker's gender in
-first-person verb forms. Pick a bulbul voice from the gender-labeled dropdown
-and the assistant automatically gets a matching system rule, e.g. for a female
-voice: *"You are a woman; use feminine first-person Marathi verb forms (करते,
-शकते, सांगते, आले, केले), never masculine (करतो, शकतो, आलो)."* - and the
-masculine equivalent for a male voice. You don't need to edit the system
-prompt by hand for this.
+Marathi marks the speaker's gender in first-person verb forms. When the
+configured language is Marathi, picking a bulbul voice from the gender-labeled
+dropdown automatically adds a matching system rule, e.g. for a female voice:
+*"You are a woman; use feminine first-person Marathi verb forms (करते, शकते,
+सांगते, आले, केले), never masculine (करतो, शकतो, आलो)."* - and the masculine
+equivalent for a male voice. You don't need to edit the system prompt by hand
+for this.
+
+This rule is Marathi-specific grammar and is only ever added when Language is
+set to Marathi (`mr-IN`); gender agreement rules differ across Sarvam's other
+supported languages and aren't asserted here without being verified first.
+For other languages, the voice dropdown still groups by gender, but no
+grammar rule is added - the model follows its own default behavior.
 
 ## Home Assistant MCP
 
@@ -155,10 +191,10 @@ and use **Test** to confirm the connection and see the available tool count.
 
 At session start, the assistant loads the list of devices you've exposed to
 Assist (name, domain, area) into its system context, so it can match what you
-say - in Marathi, English, or mixed - to the right device without you ever
-hardcoding device names anywhere. If an action can't be matched to an exact
-device, the assistant asks one short clarifying question instead of saying
-"not found."
+say - in your configured language, English, or mixed - to the right device
+without you ever hardcoding device names anywhere. If an action can't be
+matched to an exact device, the assistant asks one short clarifying question
+instead of saying "not found."
 
 For "turn off/on all lights" style requests, the assistant prefers a single
 domain-wide call when turning things off, falls back to one call per device

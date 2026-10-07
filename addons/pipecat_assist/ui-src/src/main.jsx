@@ -450,6 +450,7 @@ const API = {
     appUrl(`api/assist/integrations/${encodeURIComponent(integrationId)}/models?capability=${encodeURIComponent(capability)}`),
   voices: (integrationId) =>
     appUrl(`api/assist/integrations/${encodeURIComponent(integrationId)}/voices`),
+  languages: appUrl("api/assist/sarvam/languages"),
 };
 
 const REDACTED = "__redacted__";
@@ -684,6 +685,7 @@ function App() {
   const [tab, setTab] = useState("assistant");
   const [modelOptions, setModelOptions] = useState({});
   const [voiceOptions, setVoiceOptions] = useState({});
+  const [languageOptions, setLanguageOptions] = useState([]);
   const [mcpResult, setMcpResult] = useState(null);
   const [message, setMessage] = useState({ text: "", tone: "" });
   const [fatalError, setFatalError] = useState("");
@@ -797,6 +799,14 @@ function App() {
     if (!response.ok) return;
     const result = await response.json();
     setVoiceOptions((current) => ({ ...current, [integrationId]: result.voices || [] }));
+  }
+
+  async function loadLanguageOptions() {
+    if (languageOptions.length) return;
+    const response = await fetch(API.languages);
+    if (!response.ok) return;
+    const result = await response.json();
+    setLanguageOptions(result.languages || []);
   }
 
   async function persistConfig(payload, successText = "Saved") {
@@ -950,6 +960,8 @@ function App() {
             loadModelOptions={loadModelOptions}
             voiceOptions={voiceOptions}
             loadVoiceOptions={loadVoiceOptions}
+            languageOptions={languageOptions}
+            loadLanguageOptions={loadLanguageOptions}
             updateConfig={updateConfig}
             updateFlow={updateFlow}
             updateStepByKind={updateStepByKind}
@@ -1110,6 +1122,30 @@ function SecretSetting({ integration, field, label, updateIntegration, wide = fa
   );
 }
 
+function LanguageSetting({ sarvamIntegration, languageOptions, loadLanguageOptions, updateIntegration }) {
+  const value = sarvamIntegration?.language || "en-IN";
+  const known = languageOptions.some((language) => language.code === value);
+
+  return (
+    <Field label="Language">
+      <select
+        value={value}
+        onFocus={() => loadLanguageOptions()}
+        onChange={(event) =>
+          updateIntegration("sarvam", (item) => ({ ...item, language: event.target.value }))
+        }
+      >
+        {!known && <option value={value}>{value}</option>}
+        {languageOptions.map((language) => (
+          <option key={language.code} value={language.code}>
+            {language.label}
+          </option>
+        ))}
+      </select>
+    </Field>
+  );
+}
+
 function VoiceSetting({ ttsStep, sarvamIntegration, voiceOptions, loadVoiceOptions, updateStepByKind }) {
   const options = voiceOptions?.sarvam || [];
   const female = options.filter((voice) => voice.gender === "female");
@@ -1205,6 +1241,8 @@ function SettingsView({
   loadModelOptions,
   voiceOptions,
   loadVoiceOptions,
+  languageOptions,
+  loadLanguageOptions,
   updateConfig,
   updateFlow,
   updateStepByKind,
@@ -1235,6 +1273,7 @@ function SettingsView({
 
   useEffect(() => {
     loadVoiceOptions("sarvam");
+    loadLanguageOptions();
   }, []);
 
   return (
@@ -1242,15 +1281,12 @@ function SettingsView({
       <section className="panel inspector settings-editor">
         <SettingsSection title="Sarvam AI" status={secretStatus(sarvam, "api_key")}>
           <SecretSetting integration={sarvam} field="api_key" label="API key" updateIntegration={updateIntegration} wide />
-          <Field label="Language">
-            <input
-              autoComplete="off"
-              value={sarvam?.language || "en-IN"}
-              onChange={(event) =>
-                updateIntegration("sarvam", (item) => ({ ...item, language: event.target.value || "en-IN" }))
-              }
-            />
-          </Field>
+          <LanguageSetting
+            sarvamIntegration={sarvam}
+            languageOptions={languageOptions}
+            loadLanguageOptions={loadLanguageOptions}
+            updateIntegration={updateIntegration}
+          />
           <VoiceSetting
             ttsStep={ttsStep}
             sarvamIntegration={sarvam}
@@ -1259,8 +1295,7 @@ function SettingsView({
             updateStepByKind={updateStepByKind}
           />
           <div className="empty-state wide">
-            Language should be a Sarvam BCP-47 code, e.g. en-IN, hi-IN, mr-IN, ta-IN. This one
-            key and language cover speech-to-text and text-to-speech.
+            This one language covers both speech-to-text and text-to-speech.
           </div>
         </SettingsSection>
 

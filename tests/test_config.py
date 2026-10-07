@@ -182,5 +182,33 @@ class VoiceModelCompatibilityRepairTests(unittest.TestCase):
             self.assertEqual(config.integration("sarvam").default_voice, "ishita")
 
 
+class LanguageRepairTests(unittest.TestCase):
+    def _payload_with_language(self, language: str) -> dict:
+        payload = _old_shape_payload()
+        sarvam = next(item for item in payload["integrations"] if item["id"] == "sarvam")
+        sarvam["language"] = language
+        return payload
+
+    def test_unsupported_language_code_is_reset_to_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pipecat_assist.json"
+            path.write_text(json.dumps(self._payload_with_language("fr-FR")), encoding="utf-8")
+
+            config = ConfigStore(path).load()
+
+            from app.sarvam_languages import SARVAM_LANGUAGE_CODES
+
+            self.assertIn(config.integration("sarvam").language, SARVAM_LANGUAGE_CODES)
+
+    def test_supported_language_code_is_left_untouched(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "pipecat_assist.json"
+            path.write_text(json.dumps(self._payload_with_language("ta-IN")), encoding="utf-8")
+
+            config = ConfigStore(path).load()
+
+            self.assertEqual(config.integration("sarvam").language, "ta-IN")
+
+
 if __name__ == "__main__":
     unittest.main()

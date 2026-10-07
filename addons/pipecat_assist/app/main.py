@@ -71,6 +71,7 @@ from app.mcp_bridge import (
     list_mcp_call_history,
 )
 from app.ha_device_context import build_device_list_text
+from app.sarvam_languages import SARVAM_LANGUAGES
 from app.sarvam_voices import gender_instruction
 from app.web_search_tool import run_tavily_search, web_search_schema
 from app.session_memory import SESSION_MEMORY
@@ -584,6 +585,13 @@ async def api_integration_voices(integration_id: str, model: str = ""):
     if not integration:
         raise HTTPException(status_code=404, detail="Integration not found")
     return {"voices": _voices_for_integration(integration, model)}
+
+
+@app.get("/api/assist/sarvam/languages")
+async def api_sarvam_languages():
+    """Return Sarvam's supported STT/TTS languages for the settings dropdown."""
+
+    return {"languages": SARVAM_LANGUAGES}
 
 
 @app.post("/api/assist/mcp/check")
@@ -1507,7 +1515,7 @@ def _tools_include_device_list(flow: FlowConfig) -> bool:
     return bool((step.settings or {}).get("include_device_list", True))
 
 
-def _effective_instructions(flow: FlowConfig, voice: str = "") -> str:
+def _effective_instructions(flow: FlowConfig, voice: str = "", language: str = "") -> str:
     instructions = flow.instructions
     if CONVERSATION_END_SYSTEM_HINT not in instructions:
         instructions += f"\n\n{CONVERSATION_END_SYSTEM_HINT}"
@@ -1516,7 +1524,7 @@ def _effective_instructions(flow: FlowConfig, voice: str = "") -> str:
             "\n\nWhen you decide to use web search, first say "
             '"Please hold, I\'m checking." Then run the search and answer briefly.'
         )
-    gender_rule = gender_instruction(voice)
+    gender_rule = gender_instruction(voice, language)
     if gender_rule:
         instructions += f"\n\n{gender_rule}"
     return instructions
@@ -1743,7 +1751,13 @@ def _build_stt_service(
     raise RuntimeError(f"STT provider {integration.kind} is not supported by composed runtime")
 
 
-def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=None, voice: str = ""):
+def _build_llm_service(
+    config: RuntimeConfig,
+    flow: FlowConfig,
+    tools_schema=None,
+    voice: str = "",
+    language: str = "",
+):
     step, integration = _step_integration(config, flow, "llm")
     integration = _require_integration(integration, "LLM", fields=())
     model = _step_model_for(step, integration, "llm")
@@ -1756,7 +1770,7 @@ def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=Non
         )
         settings_kwargs: dict[str, Any] = {
             "model": model or DEFAULT_SARVAM_LLM_MODEL,
-            "system_instruction": _effective_instructions(flow, voice),
+            "system_instruction": _effective_instructions(flow, voice, language),
             "reasoning_effort": sarvam_reasoning_effort,
         }
         if flow.max_output_tokens:
@@ -1770,7 +1784,7 @@ def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=Non
 
         settings_kwargs: dict[str, Any] = {
             "model": model or integration.default_model or DEFAULT_LOCAL_LLM_MODEL,
-            "system_instruction": _effective_instructions(flow, voice),
+            "system_instruction": _effective_instructions(flow, voice, language),
         }
         if flow.max_output_tokens:
             settings_kwargs["max_tokens"] = flow.max_output_tokens
@@ -1855,9 +1869,16 @@ async def run_bot(
 
     tts_step, tts_integration = _step_integration(config, flow, "tts")
     speaker_voice = _step_voice(tts_step, tts_integration)
+    speaker_language = (
+        (tts_integration.language or DEFAULT_SARVAM_LANGUAGE).strip()
+        if tts_integration
+        else DEFAULT_SARVAM_LANGUAGE
+    )
 
     stt = _build_stt_service(config, flow, language_override=language_override)
-    llm = _build_llm_service(config, flow, tools_schema=tools_schema, voice=speaker_voice)
+    llm = _build_llm_service(
+        config, flow, tools_schema=tools_schema, voice=speaker_voice, language=speaker_language
+    )
     _register_local_tool_handlers(llm, local_tool_schemas)
     tts = _build_tts_service(config, flow)
 
@@ -1878,7 +1899,10 @@ async def run_bot(
 
     instruction_role = _instruction_role(llm_integration)
     context_messages = [
-        {"role": instruction_role, "content": _effective_instructions(flow, speaker_voice)}
+        {
+            "role": instruction_role,
+            "content": _effective_instructions(flow, speaker_voice, speaker_language),
+        }
     ]
     if flow.greeting.strip():
         context_messages.append({"role": instruction_role, "content": flow.greeting})

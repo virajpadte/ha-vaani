@@ -42,31 +42,47 @@ class SpeakerGenderTests(unittest.TestCase):
 
 
 class GenderInstructionTests(unittest.TestCase):
-    def test_confirmed_female_speaker_gets_exact_feminine_rule(self):
+    """The Marathi verb-form rule's grammar is Marathi-specific, so it must only ever be
+    returned when the configured language is Marathi - gender agreement rules differ
+    across Sarvam's other supported languages and have not been verified here."""
+
+    def test_confirmed_female_speaker_gets_exact_feminine_rule_for_marathi(self):
         self.assertEqual(
-            gender_instruction("ishita"),
+            gender_instruction("ishita", "mr-IN"),
             "You are a woman; use feminine first-person Marathi verb forms (करते, शकते, "
             "सांगते, आले, केले), never masculine (करतो, शकतो, आलो). Verbs that agree with "
             "an object (e.g. 'light बंद केला') stay as they are.",
         )
 
-    def test_confirmed_male_speaker_gets_symmetric_masculine_rule(self):
+    def test_confirmed_male_speaker_gets_symmetric_masculine_rule_for_marathi(self):
         self.assertEqual(
-            gender_instruction("shubh"),
+            gender_instruction("shubh", "mr-IN"),
             "You are a man; use masculine first-person Marathi verb forms (करतो, शकतो, "
             "सांगतो, आलो, केला), never feminine (करते, शकते, आले). Verbs that agree with "
             "an object (e.g. 'light बंद केला') stay as they are.",
         )
 
-    def test_inferred_speaker_still_gets_a_rule(self):
-        self.assertTrue(gender_instruction("kavya").startswith("You are a woman"))
-        self.assertTrue(gender_instruction("rahul").startswith("You are a man"))
+    def test_inferred_speaker_still_gets_a_rule_for_marathi(self):
+        self.assertTrue(gender_instruction("kavya", "mr-IN").startswith("You are a woman"))
+        self.assertTrue(gender_instruction("rahul", "mr-IN").startswith("You are a man"))
 
     def test_unknown_speaker_returns_empty_string(self):
-        self.assertEqual(gender_instruction("not-a-real-voice"), "")
+        self.assertEqual(gender_instruction("not-a-real-voice", "mr-IN"), "")
 
     def test_no_speaker_selected_returns_empty_string(self):
-        self.assertEqual(gender_instruction(""), "")
+        self.assertEqual(gender_instruction("", "mr-IN"), "")
+
+    def test_non_marathi_language_suppresses_the_rule_even_for_a_known_speaker(self):
+        self.assertEqual(gender_instruction("ishita", "hi-IN"), "")
+        self.assertEqual(gender_instruction("shubh", "ta-IN"), "")
+        self.assertEqual(gender_instruction("ishita", "en-IN"), "")
+
+    def test_no_language_specified_suppresses_the_rule(self):
+        self.assertEqual(gender_instruction("ishita"), "")
+        self.assertEqual(gender_instruction("ishita", ""), "")
+
+    def test_marathi_match_is_case_insensitive(self):
+        self.assertTrue(gender_instruction("ishita", "MR-IN").startswith("You are a woman"))
 
 
 class SpeakersForModelTests(unittest.TestCase):

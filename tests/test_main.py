@@ -116,35 +116,46 @@ class BuildLlmServiceTests(unittest.TestCase):
 
 
 class EffectiveInstructionsGenderRuleTests(unittest.TestCase):
-    def test_confirmed_female_speaker_adds_feminine_rule(self):
+    def test_confirmed_female_speaker_adds_feminine_rule_for_marathi(self):
         config, flow = _config_with_llm_kind("sarvam")
         for step in flow.steps:
             if step.kind == "tts":
                 step.voice = "ishita"
-        instructions = main._effective_instructions(flow, "ishita")
+        instructions = main._effective_instructions(flow, "ishita", "mr-IN")
         self.assertIn("You are a woman", instructions)
 
-    def test_confirmed_male_speaker_adds_masculine_rule(self):
+    def test_confirmed_male_speaker_adds_masculine_rule_for_marathi(self):
         config, flow = _config_with_llm_kind("sarvam")
-        instructions = main._effective_instructions(flow, "shubh")
+        instructions = main._effective_instructions(flow, "shubh", "mr-IN")
         self.assertIn("You are a man", instructions)
 
     def test_unknown_speaker_adds_no_gender_rule(self):
         config, flow = _config_with_llm_kind("sarvam")
-        instructions = main._effective_instructions(flow, "not-a-real-voice")
+        instructions = main._effective_instructions(flow, "not-a-real-voice", "mr-IN")
         self.assertNotIn("You are a woman", instructions)
         self.assertNotIn("You are a man", instructions)
 
     def test_no_voice_selected_adds_no_gender_rule(self):
         config, flow = _config_with_llm_kind("sarvam")
-        instructions = main._effective_instructions(flow, "")
+        instructions = main._effective_instructions(flow, "", "mr-IN")
         self.assertNotIn("You are a woman", instructions)
         self.assertNotIn("You are a man", instructions)
 
-    def test_build_llm_service_passes_voice_through_to_system_instruction(self):
+    def test_non_marathi_language_adds_no_gender_rule_even_for_a_known_speaker(self):
         config, flow = _config_with_llm_kind("sarvam")
-        llm = main._build_llm_service(config, flow, voice="ishita")
+        instructions = main._effective_instructions(flow, "ishita", "ta-IN")
+        self.assertNotIn("You are a woman", instructions)
+        self.assertNotIn("You are a man", instructions)
+
+    def test_build_llm_service_passes_voice_and_language_through_to_system_instruction(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        llm = main._build_llm_service(config, flow, voice="ishita", language="mr-IN")
         self.assertIn("You are a woman", llm._settings.system_instruction)
+
+    def test_build_llm_service_omits_gender_rule_without_marathi_language(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        llm = main._build_llm_service(config, flow, voice="ishita", language="hi-IN")
+        self.assertNotIn("You are a woman", llm._settings.system_instruction)
 
 
 class VoicesForIntegrationTests(unittest.TestCase):
@@ -186,6 +197,15 @@ class VoicesForIntegrationTests(unittest.TestCase):
         ids = {voice["id"] for voice in voices}
         self.assertIn("vidya", ids)
         self.assertNotIn("shubh", ids)
+
+
+class SarvamLanguagesEndpointTests(unittest.IsolatedAsyncioTestCase):
+    async def test_returns_the_full_verified_language_list(self):
+        result = await main.api_sarvam_languages()
+        codes = {item["code"] for item in result["languages"]}
+        self.assertIn("mr-IN", codes)
+        self.assertIn("en-IN", codes)
+        self.assertEqual(len(codes), 11)
 
 
 if __name__ == "__main__":

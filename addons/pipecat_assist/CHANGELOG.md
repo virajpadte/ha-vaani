@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.1.92
+
+- Replaced the free-text Language field (which required typing a Sarvam
+  BCP-47 code by hand) with a dropdown of Sarvam's verified supported
+  languages - English plus 10 Indic languages. Added a matching
+  `/api/assist/sarvam/languages` endpoint and a config-load repair that
+  resets an unsupported saved language code to the default.
+- Scoped the Marathi gender verb-form rule to only apply when Language is
+  set to Marathi - it no longer asserts Marathi grammar for other
+  configured languages. Generalized Marathi-only wording in the README/DOCS
+  to reflect the full supported-language list.
+- Replaced the add-on and Home Assistant integration's icon/logo with
+  original artwork. They still showed the upstream Pipecat Assist cat
+  mascot and "Pipecat Assist" wordmark after the rename to Sarvam Assist.
+
+## 0.1.91
+
+- Fixed TTS producing no audio when the saved voice belongs to a different
+  bulbul model than the one configured (e.g. a bulbul:v2-only speaker saved
+  against bulbul:v3) - confirmed live via Sarvam's own API rejecting the
+  mismatched pairing with HTTP 400. The voices endpoint now filters by the
+  integration's configured TTS model, and a config-load repair resets any
+  already-saved incompatible pairing to a valid speaker automatically.
+
 ## 0.1.90
 
 - Renamed the add-on and Home Assistant integration to **Sarvam Assist**

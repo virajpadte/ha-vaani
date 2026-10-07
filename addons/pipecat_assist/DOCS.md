@@ -34,11 +34,14 @@ The settings screen configures the whole fixed pipeline in one place:
 
 - **Sarvam API key** - required for STT, the Model (when using Sarvam Cloud),
   and TTS.
-- **Voice** - a dropdown of bulbul speakers grouped and labeled by gender. The
-  assistant automatically adds a matching Marathi first-person verb-form rule
-  to its system prompt based on the voice you pick (feminine or masculine) -
-  no manual prompt editing needed.
-- **Language** - the STT/TTS language, e.g. `mr-IN` for Marathi.
+- **Language** - a dropdown of Sarvam's supported languages (English plus 10
+  Indic languages - Hindi, Marathi, Tamil, Telugu, Bengali, Gujarati, Kannada,
+  Malayalam, Odia, Punjabi). One setting covers both STT and TTS.
+- **Voice** - a dropdown of bulbul speakers grouped and labeled by gender.
+  When Language is set to Marathi, the assistant automatically adds a
+  matching first-person verb-form rule to its system prompt based on the
+  voice you pick (feminine or masculine) - no manual prompt editing needed.
+  This rule is Marathi-specific grammar and isn't added for other languages.
 - **Model source** - **Sarvam Cloud** (just the Sarvam API key) or **Local
   (OpenAI-compatible)** (a base URL, a model name, and an optional API key -
   see [Local models](#local-models-ollama-vllm-lm-studio-self-hosted-sarvam)
@@ -67,11 +70,11 @@ custom deployments where the Supervisor token is unavailable.
 
 At the start of each session, Sarvam Assist loads the list of devices you've
 exposed to Assist (name, domain, area) into the model's context, cached for
-about a minute. This lets you refer to devices naturally - in Marathi,
-English, or mixed - without any device name ever being hardcoded in this
-add-on's code or prompts. If what you ask for can't be matched to an exact
-device, the assistant asks one short clarifying question instead of silently
-failing or guessing.
+about a minute. This lets you refer to devices naturally - in your configured
+language, English, or mixed - without any device name ever being hardcoded in
+this add-on's code or prompts. If what you ask for can't be matched to an
+exact device, the assistant asks one short clarifying question instead of
+silently failing or guessing.
 
 For requests like "turn off all lights" or "turn on everything in the
 kitchen," the assistant prefers one domain/area-wide call when turning things
@@ -136,7 +139,7 @@ on add-on restart.
 
 Open the settings UI, confirm Sarvam and Home Assistant MCP both show as
 configured/connected, and use **Talk**. Allow microphone access, wait for
-**Connected**, then try (for a Marathi setup):
+**Connected**, then try (for a Marathi setup - swap in your own language):
 
 - "घरातले कुठले डिव्हाइसेस आहेत?" ("What devices are in the house?")
 - "दिवाणखान्यातला लाईट लावा." ("Turn on the living room light.")
