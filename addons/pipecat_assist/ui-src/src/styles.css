@@ -678,12 +678,8 @@ h3 {
   padding-top: 18px;
 }
 
-.integration-editor {
+.settings-editor {
   gap: 16px;
-}
-
-.integration-editor .section-title {
-  display: none;
 }
 
 .integration-head-actions {
@@ -706,6 +702,36 @@ h3 {
   display: grid;
   gap: 12px;
   min-width: 0;
+}
+
+.advanced-section {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--soft);
+}
+
+.advanced-section summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  list-style: none;
+}
+
+.advanced-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-section[open] summary {
+  margin-bottom: 6px;
+}
+
+.advanced-section .form-grid,
+.advanced-section .recording-list,
+.advanced-section .button-row {
+  margin-top: 10px;
 }
 
 .section-title {
@@ -1606,7 +1632,7 @@ html[data-theme="dark"] .status-pill.error {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
-.integration-detail .integration-editor {
+.integration-detail .settings-editor {
   max-width: 980px;
 }
 
