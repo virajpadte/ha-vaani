@@ -1244,6 +1244,28 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+// crypto.randomUUID() only exists in secure contexts (HTTPS, or localhost).
+// Home Assistant's ingress is commonly plain http:// on a LAN hostname/IP,
+// which browsers do not treat as secure, so that call throws there and
+// crypto.getRandomValues() (not secure-context-gated) is used instead.
+function randomId(length = 8) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    try {
+      return crypto.randomUUID().replace(/-/g, "").slice(0, length);
+    } catch {
+      // fall through to getRandomValues/Math.random below
+    }
+  }
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const bytes = new Uint8Array(Math.ceil(length / 2));
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"))
+      .join("")
+      .slice(0, length);
+  }
+  return Math.random().toString(16).slice(2).padEnd(length, "0").slice(0, length);
+}
+
 function messagesToText(messages, fallback = "") {
   if (typeof messages === "string") return messages || fallback;
   if (!Array.isArray(messages)) return fallback;
@@ -1411,7 +1433,7 @@ function makeFlowNodeId(label, nodes) {
 
 function makeStep(kind, label, integrationId = "", suffix = "") {
   return {
-    id: `${kind}-${suffix || crypto.randomUUID().slice(0, 8)}`,
+    id: `${kind}-${suffix || randomId(8)}`,
     kind,
     label,
     enabled: kind !== "flow",
@@ -4689,7 +4711,7 @@ function browserClientId() {
   try {
     const existing = localStorage.getItem(key);
     if (existing) return existing;
-    const created = crypto.randomUUID();
+    const created = randomId(32);
     localStorage.setItem(key, created);
     return created;
   } catch {
@@ -5609,7 +5631,7 @@ function VoiceTest({ config, flow }) {
       channelRef.current.send(
         JSON.stringify({
           label: "rtvi-ai",
-          id: crypto.randomUUID().slice(0, 8),
+          id: randomId(8),
           type: "disconnect-bot",
           data: {},
         }),
@@ -5722,7 +5744,7 @@ function VoiceTest({ config, flow }) {
         channel.send(
           JSON.stringify({
             label: "rtvi-ai",
-            id: crypto.randomUUID().slice(0, 8),
+            id: randomId(8),
             type: "client-ready",
           data: {
               version: "1.4.0",
