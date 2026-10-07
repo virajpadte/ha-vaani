@@ -1,4 +1,11 @@
-"""Optional web search tool exposed to assistant models."""
+"""Optional web search tool exposed to assistant models.
+
+Unused as of the Sarvam-only rewrite: the LLM-indirected search below (asking
+OpenAI/Gemini to search on the model's behalf) was removed along with those
+providers. A direct search-API tool (Tavily) replaces this module's role in a
+follow-up change. Left in place only so nothing currently importing these
+names breaks mid-migration; nothing calls these functions anymore.
+"""
 
 from __future__ import annotations
 
@@ -10,7 +17,7 @@ from loguru import logger
 from openai import AsyncOpenAI
 from pipecat.adapters.schemas.function_schema import FunctionSchema
 
-from app.config import DEFAULT_GEMINI_TEXT_MODEL
+DEFAULT_GEMINI_TEXT_MODEL = "gemini-2.5-flash"
 
 if TYPE_CHECKING:
     from pipecat.services.llm_service import FunctionCallParams
