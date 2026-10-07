@@ -1562,7 +1562,6 @@ html[data-theme="dark"] .status-pill.error {
 .template-card:not(:disabled):hover,
 .pipeline-card:not(:disabled):hover,
 .node:not(:disabled):hover,
-.palette-step:not(:disabled):hover,
 .theme-toggle:not(:disabled):hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 26px rgba(16, 24, 32, 0.12);
@@ -1575,9 +1574,16 @@ html[data-theme="dark"] .status-pill.error {
 .template-card:not(:disabled):active,
 .pipeline-card:not(:disabled):active,
 .node:not(:disabled):active,
-.palette-step:not(:disabled):active,
 .theme-toggle:not(:disabled):active {
   transform: translateY(0) scale(0.98);
+}
+
+/* .palette-step is draggable: a CSS transform applied on :hover/:active here
+   (via the shared rules above) makes Chrome cancel the native HTML5 drag
+   gesture as soon as the mouse goes down, so it gets its own transform-free
+   feedback instead. */
+.palette-step:not(:disabled):hover {
+  box-shadow: 0 10px 26px rgba(16, 24, 32, 0.12);
 }
 
 .pipelines-home {
