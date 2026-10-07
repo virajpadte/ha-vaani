@@ -80,6 +80,10 @@ from app.config import (
     DEFAULT_OPENAI_STT_MODEL,
     DEFAULT_OPENAI_TTS_MODEL,
     DEFAULT_OPENAI_TTS_VOICE,
+    DEFAULT_SARVAM_LANGUAGE,
+    DEFAULT_SARVAM_STT_MODEL,
+    DEFAULT_SARVAM_TTS_MODEL,
+    DEFAULT_SARVAM_TTS_VOICE,
     DEFAULT_SONIOX_MODEL,
     DEFAULT_SPEECHMATICS_MODEL,
     DEFAULT_WEB_SEARCH_MODEL,
@@ -144,6 +148,7 @@ HA_STT_BRIDGE_KINDS = {
     "local_runtime",
     "openai",
     "openai_cloud",
+    "sarvam",
     "soniox",
     "speechmatics",
 }
@@ -158,6 +163,7 @@ HA_TTS_BRIDGE_KINDS = {
     "local_runtime",
     "openai",
     "openai_cloud",
+    "sarvam",
     "soniox",
 }
 IMAGE_GENERATION_KINDS = {"google_imagen", "fal_image"}
@@ -1585,6 +1591,27 @@ async def _transcribe_audio_bytes(
         )
         return {"text": str(transcript).strip()}
 
+    if integration.kind == "sarvam":
+        headers = {"api-subscription-key": _integration_api_key_or_400(integration, "STT")}
+        data: dict[str, Any] = {"model": model or DEFAULT_SARVAM_STT_MODEL}
+        sarvam_language = _runtime_language(flow, integration)
+        if sarvam_language:
+            data["language_code"] = sarvam_language
+
+        async def request_sarvam_stt() -> httpx.Response:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    "https://api.sarvam.ai/speech-to-text",
+                    headers=headers,
+                    data=data,
+                    files={"file": ("speech.wav", stt_audio, stt_content_type)},
+                )
+                response.raise_for_status()
+                return response
+
+        response = await _provider_call("Sarvam STT", request_sarvam_stt)
+        return {"text": str(response.json().get("transcript", "")).strip()}
+
     if integration.kind in {"gradium", "soniox"}:
         async def request_streaming_stt() -> str:
             queue: asyncio.Queue[bytes | None] = asyncio.Queue()
@@ -2195,6 +2222,46 @@ async def _gradium_tts_audio(
     return _wav_from_pcm(bytes(audio), sample_rate=48000, sample_width=2, channels=1), "audio/wav", "wav"
 
 
+async def _sarvam_tts_audio(
+    *,
+    integration: IntegrationConfig,
+    text: str,
+    model: str,
+    voice: str,
+    language: str,
+    speed: float,
+) -> tuple[bytes, str, str]:
+    sample_rate = 24000
+    payload: dict[str, Any] = {
+        "text": text,
+        "language_code": language or DEFAULT_SARVAM_LANGUAGE,
+        "model": model or DEFAULT_SARVAM_TTS_MODEL,
+        "speaker": voice or DEFAULT_SARVAM_TTS_VOICE,
+        "speech_sample_rate": sample_rate,
+        "output_audio_codec": "linear16",
+    }
+    if speed and abs(speed - 1.0) > 0.001:
+        payload["pace"] = speed
+    headers = {
+        "api-subscription-key": _integration_api_key_or_400(integration, "TTS"),
+        "Content-Type": "application/json",
+    }
+    async with httpx.AsyncClient(timeout=45.0) as client:
+        response = await client.post(
+            "https://api.sarvam.ai/text-to-speech",
+            headers=headers,
+            json=payload,
+        )
+        response.raise_for_status()
+    audios = response.json().get("audios") or []
+    audio = b"".join(base64.b64decode(chunk) for chunk in audios)
+    if not audio:
+        raise RuntimeError("Sarvam TTS returned no audio")
+    if audio.startswith(b"RIFF"):
+        return audio, "audio/wav", "wav"
+    return _wav_from_pcm(audio, sample_rate=sample_rate, sample_width=2, channels=1), "audio/wav", "wav"
+
+
 async def _soniox_tts_audio(
     *,
     integration: IntegrationConfig,
@@ -2397,6 +2464,28 @@ async def _synthesize_tts_audio(
             (time.perf_counter() - started_at) * 1000,
         )
         return response.content, "audio/mpeg", "mp3"
+
+    if integration.kind == "sarvam":
+        audio = await _provider_call(
+            "Sarvam TTS",
+            lambda: _sarvam_tts_audio(
+                integration=integration,
+                text=text,
+                model=model,
+                voice=voice,
+                language=language,
+                speed=speed,
+            ),
+        )
+        logger.info(
+            "HA Assist TTS synth finished flow={} integration={} model={} voice={} duration_ms={:.0f}",
+            flow.id,
+            integration.name,
+            model or DEFAULT_SARVAM_TTS_MODEL,
+            voice or DEFAULT_SARVAM_TTS_VOICE,
+            (time.perf_counter() - started_at) * 1000,
+        )
+        return audio
 
     if integration.kind == "soniox":
         audio = await _provider_call(
@@ -2833,7 +2922,7 @@ def _bridge_unavailable(role: str, supported_names: str) -> HTTPException:
 
 def _ha_supported_stt_names() -> str:
     return (
-        "Soniox, Deepgram, Speechmatics, Gradium, OpenAI Cloud/Realtime, "
+        "Soniox, Deepgram, Speechmatics, Gradium, Sarvam AI, OpenAI Cloud/Realtime, "
         "Google Gemini Cloud, and Local runtime"
     )
 
@@ -2841,7 +2930,7 @@ def _ha_supported_stt_names() -> str:
 def _ha_supported_tts_names() -> str:
     return (
         "Cartesia, Gradium, Google Cloud TTS, Google Cloud TTS Streaming, "
-        "ElevenLabs, OpenAI Cloud/Realtime, Google Gemini Cloud, Soniox, "
+        "ElevenLabs, Sarvam AI, OpenAI Cloud/Realtime, Google Gemini Cloud, Soniox, "
         "and Local runtime"
     )
 
@@ -2874,6 +2963,8 @@ def _ha_stt_model_fallback(integration: IntegrationConfig | None) -> str:
         return integration.default_model or DEFAULT_SONIOX_MODEL
     if integration.kind == "speechmatics":
         return integration.default_model or DEFAULT_SPEECHMATICS_MODEL
+    if integration.kind == "sarvam":
+        return integration.default_stt_model or DEFAULT_SARVAM_STT_MODEL
     return integration.default_model or ""
 
 
@@ -2896,6 +2987,8 @@ def _ha_tts_model_fallback(integration: IntegrationConfig | None) -> str:
         return integration.default_model or "default"
     if integration.kind == "soniox":
         return integration.default_tts_model or integration.default_model or "tts-rt-v1"
+    if integration.kind == "sarvam":
+        return integration.default_tts_model or DEFAULT_SARVAM_TTS_MODEL
     return integration.default_tts_model or integration.default_model or ""
 
 
@@ -2916,6 +3009,8 @@ def _ha_tts_voice_fallback(integration: IntegrationConfig | None) -> str:
         return integration.default_voice or "_6Aslh2DxfmnRLmP"
     if integration.kind == "soniox":
         return integration.default_voice or "Adrian"
+    if integration.kind == "sarvam":
+        return integration.default_voice or DEFAULT_SARVAM_TTS_VOICE
     return integration.default_voice or ""
 
 
@@ -4617,6 +4712,14 @@ def _build_stt_service(
             model=model or DEFAULT_OPENAI_STT_MODEL,
             language=language,
         )
+    if integration.kind == "sarvam":
+        from app.sarvam_services import SarvamSTTService
+
+        return SarvamSTTService(
+            api_key=_integration_api_key(integration, "STT"),
+            model=model or DEFAULT_SARVAM_STT_MODEL,
+            language_code=language or None,
+        )
 
     raise RuntimeError(f"STT provider {integration.kind} is not supported by composed runtime")
 
@@ -4791,6 +4894,16 @@ def _build_tts_service(config: RuntimeConfig, flow: FlowConfig):
             api_key=_integration_api_key(integration, "TTS"),
             text_aggregation_mode=text_aggregation_mode,
             settings=SonioxTTSService.Settings(voice=voice or None),
+        )
+    if integration.kind == "sarvam":
+        from app.sarvam_services import SarvamTTSService
+
+        return SarvamTTSService(
+            api_key=_integration_api_key(integration, "TTS"),
+            model=model or DEFAULT_SARVAM_TTS_MODEL,
+            voice=voice or DEFAULT_SARVAM_TTS_VOICE,
+            language_code=_runtime_language(flow, integration) or DEFAULT_SARVAM_LANGUAGE,
+            speed=speed,
         )
 
     raise RuntimeError(f"TTS provider {integration.kind} is not supported by composed runtime")

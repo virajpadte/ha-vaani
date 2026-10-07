@@ -52,6 +52,10 @@ DEFAULT_AWS_BEDROCK_MODEL = "amazon.nova-pro-v1:0"
 DEFAULT_DEEPGRAM_MODEL = "nova-3"
 DEFAULT_SONIOX_MODEL = "stt-rt-v5"
 DEFAULT_SPEECHMATICS_MODEL = "enhanced"
+DEFAULT_SARVAM_STT_MODEL = "saaras:v4"
+DEFAULT_SARVAM_TTS_MODEL = "bulbul:v3"
+DEFAULT_SARVAM_TTS_VOICE = "shubh"
+DEFAULT_SARVAM_LANGUAGE = "en-IN"
 DEFAULT_GOOGLE_IMAGEN_MODEL = "imagen-4.0-generate-001"
 DEFAULT_FAL_IMAGE_MODEL = "fal-ai/fast-sdxl"
 LEGACY_GEMINI_TEXT_MODELS = {
@@ -84,6 +88,7 @@ COMPOSED_STT_PROVIDER_KINDS = {
     "speechmatics",
     "gradium",
     "openai_cloud",
+    "sarvam",
 }
 COMPOSED_LLM_PROVIDER_KINDS = {
     "openai_cloud",
@@ -100,6 +105,7 @@ COMPOSED_TTS_PROVIDER_KINDS = {
     "elevenlabs",
     "openai_cloud",
     "soniox",
+    "sarvam",
 }
 COMPOSED_STEP_PROVIDER_KINDS = {
     "stt": COMPOSED_STT_PROVIDER_KINDS,
@@ -161,6 +167,7 @@ class IntegrationConfig(BaseModel):
         "gradium",
         "speechmatics",
         "elevenlabs",
+        "sarvam",
         "anthropic",
         "aws_bedrock",
         "aws_nova_sonic",
@@ -338,6 +345,17 @@ def default_integrations() -> list[IntegrationConfig]:
             api_key=os.getenv("ELEVENLABS_API_KEY", ""),
             default_model=os.getenv("ELEVENLABS_TTS_MODEL", DEFAULT_ELEVENLABS_MODEL),
             default_voice=os.getenv("ELEVENLABS_TTS_VOICE", DEFAULT_ELEVENLABS_VOICE),
+        ),
+        IntegrationConfig(
+            id="sarvam",
+            name="Sarvam AI",
+            kind="sarvam",
+            enabled=bool(os.getenv("SARVAM_API_KEY")),
+            api_key=os.getenv("SARVAM_API_KEY", ""),
+            language=os.getenv("SARVAM_LANGUAGE", DEFAULT_SARVAM_LANGUAGE),
+            default_stt_model=os.getenv("SARVAM_STT_MODEL", DEFAULT_SARVAM_STT_MODEL),
+            default_tts_model=os.getenv("SARVAM_TTS_MODEL", DEFAULT_SARVAM_TTS_MODEL),
+            default_voice=os.getenv("SARVAM_TTS_VOICE", DEFAULT_SARVAM_TTS_VOICE),
         ),
         IntegrationConfig(
             id="anthropic",
@@ -1265,6 +1283,24 @@ def _repair_provider_defaults(config: RuntimeConfig) -> bool:
             changed = True
         if not openai_cloud.default_voice:
             openai_cloud.default_voice = os.getenv("OPENAI_TTS_VOICE", DEFAULT_OPENAI_TTS_VOICE)
+            changed = True
+
+    sarvam = config.integration("sarvam")
+    if sarvam:
+        if sarvam.name != "Sarvam AI":
+            sarvam.name = "Sarvam AI"
+            changed = True
+        if not sarvam.language:
+            sarvam.language = os.getenv("SARVAM_LANGUAGE", DEFAULT_SARVAM_LANGUAGE)
+            changed = True
+        if not sarvam.default_stt_model:
+            sarvam.default_stt_model = os.getenv("SARVAM_STT_MODEL", DEFAULT_SARVAM_STT_MODEL)
+            changed = True
+        if not sarvam.default_tts_model:
+            sarvam.default_tts_model = os.getenv("SARVAM_TTS_MODEL", DEFAULT_SARVAM_TTS_MODEL)
+            changed = True
+        if not sarvam.default_voice:
+            sarvam.default_voice = os.getenv("SARVAM_TTS_VOICE", DEFAULT_SARVAM_TTS_VOICE)
             changed = True
 
     google_tts = config.integration("google-cloud-tts")

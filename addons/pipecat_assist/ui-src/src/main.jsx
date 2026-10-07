@@ -571,6 +571,7 @@ const providerKinds = [
   ["gradium", "Gradium", Cloud],
   ["speechmatics", "Speechmatics", Cloud],
   ["elevenlabs", "ElevenLabs", Cloud],
+  ["sarvam", "Sarvam AI", Cloud],
   ["anthropic", "Anthropic", Cloud],
   ["aws_bedrock", "Bedrock", Cloud],
   ["aws_nova_sonic", "AWS Nova Sonic", Radio],
@@ -607,12 +608,13 @@ const languageIntegrationKinds = [
   "deepgram",
   "gradium",
   "speechmatics",
+  "sarvam",
   "openai_compatible",
   "ollama",
   "local_runtime",
 ];
 
-const speedIntegrationKinds = ["openai", "openai_cloud", "google_cloud_tts", "elevenlabs"];
+const speedIntegrationKinds = ["openai", "openai_cloud", "google_cloud_tts", "elevenlabs", "sarvam"];
 const ttsStreamingIntegrationKinds = ["cartesia", "soniox", "gradium", "google_streaming_tts"];
 const webSearchProviderKinds = ["openai_cloud", "gemini_cloud"];
 const imageGenerationProviderKinds = ["google_imagen", "fal_image"];
@@ -633,9 +635,9 @@ const stepTypes = [
 const addableStepTypes = stepTypes.filter(([kind]) => !["transport", "output"].includes(kind));
 
 const stepProviders = {
-  stt: ["soniox", "deepgram", "speechmatics", "gradium", "openai_cloud"],
+  stt: ["soniox", "deepgram", "speechmatics", "gradium", "openai_cloud", "sarvam"],
   llm: ["openai_cloud", "gemini_cloud", "aws_bedrock", "openai_compatible", "ollama"],
-  tts: ["cartesia", "gradium", "google_cloud_tts", "google_streaming_tts", "elevenlabs", "openai_cloud", "soniox"],
+  tts: ["cartesia", "gradium", "google_cloud_tts", "google_streaming_tts", "elevenlabs", "openai_cloud", "soniox", "sarvam"],
   tools: ["home_assistant_mcp", "ha_mcp", "mcp_server"],
   web_search: ["web_search"],
   output: ["gemini", "openai", "aws_nova_sonic"],
@@ -1757,6 +1759,7 @@ function integrationSummary(integration, config = null) {
       "gradium",
       "speechmatics",
       "elevenlabs",
+      "sarvam",
       "google_imagen",
       "fal_image",
     ].includes(integration.kind)
@@ -2640,9 +2643,19 @@ function validatePipeline(config, flow) {
       errors.push(`${integration.name} cannot be used as ${step.kind.toUpperCase()}.`);
     }
     if (
-      ["gemini", "gemini_cloud", "openai", "openai_cloud", "soniox", "deepgram", "cartesia", "gradium", "speechmatics", "elevenlabs"].includes(
-        integration.kind,
-      ) &&
+      [
+        "gemini",
+        "gemini_cloud",
+        "openai",
+        "openai_cloud",
+        "soniox",
+        "deepgram",
+        "cartesia",
+        "gradium",
+        "speechmatics",
+        "elevenlabs",
+        "sarvam",
+      ].includes(integration.kind) &&
       secretStatus(integration, "api_key") === "missing"
     ) {
       errors.push(`${integration.name} API key is missing.`);
@@ -4354,6 +4367,20 @@ function IntegrationSettings({
         <SecretSetting integration={integration} field="api_key" label="API key" updateIntegration={updateIntegration} />
         <TextSetting integration={integration} field="default_model" label="TTS model" updateIntegration={updateIntegration} />
         <TextSetting integration={integration} field="default_voice" label="Voice" updateIntegration={updateIntegration} />
+      </SettingsSection>
+    );
+  }
+
+  if (integration.kind === "sarvam") {
+    return (
+      <SettingsSection title={kindLabel(integration.kind)} status={secretStatus(integration, "api_key")}>
+        <SecretSetting integration={integration} field="api_key" label="API key" updateIntegration={updateIntegration} />
+        <TextSetting integration={integration} field="default_stt_model" label="STT model" updateIntegration={updateIntegration} />
+        <TextSetting integration={integration} field="default_tts_model" label="TTS model" updateIntegration={updateIntegration} />
+        <TextSetting integration={integration} field="default_voice" label="Speaker" updateIntegration={updateIntegration} />
+        <div className="empty-state wide">
+          Language should be a Sarvam BCP-47 code, e.g. en-IN, hi-IN, ta-IN.
+        </div>
       </SettingsSection>
     );
   }
