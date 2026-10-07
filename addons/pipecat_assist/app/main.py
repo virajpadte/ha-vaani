@@ -71,6 +71,8 @@ from app.mcp_bridge import (
     list_mcp_call_history,
 )
 from app.ha_device_context import build_device_list_text
+from app.sarvam_voices import gender_instruction
+from app.web_search_tool import run_tavily_search, web_search_schema
 from app.session_memory import SESSION_MEMORY
 from app.text_agent import run_text_conversation
 from app.va_pipecat import websocket_transport_params
@@ -1473,7 +1475,7 @@ def _tools_include_device_list(flow: FlowConfig) -> bool:
     return bool((step.settings or {}).get("include_device_list", True))
 
 
-def _effective_instructions(flow: FlowConfig) -> str:
+def _effective_instructions(flow: FlowConfig, voice: str = "") -> str:
     instructions = flow.instructions
     if CONVERSATION_END_SYSTEM_HINT not in instructions:
         instructions += f"\n\n{CONVERSATION_END_SYSTEM_HINT}"
@@ -1482,19 +1484,32 @@ def _effective_instructions(flow: FlowConfig) -> str:
             "\n\nWhen you decide to use web search, first say "
             '"Please hold, I\'m checking." Then run the search and answer briefly.'
         )
+    gender_rule = gender_instruction(voice)
+    if gender_rule:
+        instructions += f"\n\n{gender_rule}"
     return instructions
 
 
 def _web_search_tool_schema(config: RuntimeConfig, flow: FlowConfig) -> FunctionSchema | None:
-    """Return the optional web search tool schema for a flow.
+    """Return the web_search tool schema for a flow, when enabled and configured.
 
-    The LLM-indirected web search (an OpenAI/Gemini call used only to run a
-    search) was removed along with those providers. A direct search-API tool
-    replaces it in a follow-up change; until then, web search is a no-op even
-    if the step/integration is enabled.
+    The model calls this tool directly against Tavily's search API - no LLM
+    is used to do the searching itself.
     """
 
-    return None
+    if not _web_search_enabled(flow):
+        return None
+    _, integration = _step_integration(config, flow, "web_search")
+    integration = integration or config.integration("web-search")
+    if not integration or not integration.enabled or not integration.api_key.strip():
+        return None
+
+    api_key = integration.api_key.strip()
+
+    async def search(query: str) -> str:
+        return await run_tavily_search(api_key, query)
+
+    return web_search_schema(search)
 
 
 def _merge_tools_schema(
@@ -1696,7 +1711,7 @@ def _build_stt_service(
     raise RuntimeError(f"STT provider {integration.kind} is not supported by composed runtime")
 
 
-def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=None):
+def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=None, voice: str = ""):
     step, integration = _step_integration(config, flow, "llm")
     integration = _require_integration(integration, "LLM", fields=())
     model = _step_model_for(step, integration, "llm")
@@ -1709,7 +1724,7 @@ def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=Non
         )
         settings_kwargs: dict[str, Any] = {
             "model": model or DEFAULT_SARVAM_LLM_MODEL,
-            "system_instruction": _effective_instructions(flow),
+            "system_instruction": _effective_instructions(flow, voice),
             "reasoning_effort": sarvam_reasoning_effort,
         }
         if flow.max_output_tokens:
@@ -1723,7 +1738,7 @@ def _build_llm_service(config: RuntimeConfig, flow: FlowConfig, tools_schema=Non
 
         settings_kwargs: dict[str, Any] = {
             "model": model or integration.default_model or DEFAULT_LOCAL_LLM_MODEL,
-            "system_instruction": _effective_instructions(flow),
+            "system_instruction": _effective_instructions(flow, voice),
         }
         if flow.max_output_tokens:
             settings_kwargs["max_tokens"] = flow.max_output_tokens
@@ -1806,14 +1821,16 @@ async def run_bot(
     local_tool_schemas = [schema for schema in [_web_search_tool_schema(config, flow)] if schema]
     tools_schema = _merge_tools_schema(mcp_tools_schema, local_tool_schemas)
 
+    tts_step, tts_integration = _step_integration(config, flow, "tts")
+    speaker_voice = _step_voice(tts_step, tts_integration)
+
     stt = _build_stt_service(config, flow, language_override=language_override)
-    llm = _build_llm_service(config, flow, tools_schema=tools_schema)
+    llm = _build_llm_service(config, flow, tools_schema=tools_schema, voice=speaker_voice)
     _register_local_tool_handlers(llm, local_tool_schemas)
     tts = _build_tts_service(config, flow)
 
     _, stt_integration = _step_integration(config, flow, "stt")
     llm_step, llm_integration = _step_integration(config, flow, "llm")
-    _, tts_integration = _step_integration(config, flow, "tts")
     llm_model = _step_model(llm_step, llm_integration)
     provider_label = "+".join(
         item.kind
@@ -1828,7 +1845,9 @@ async def run_bot(
     )
 
     instruction_role = _instruction_role(llm_integration)
-    context_messages = [{"role": instruction_role, "content": _effective_instructions(flow)}]
+    context_messages = [
+        {"role": instruction_role, "content": _effective_instructions(flow, speaker_voice)}
+    ]
     if flow.greeting.strip():
         context_messages.append({"role": instruction_role, "content": flow.greeting})
     if bridge and _tools_include_device_list(flow):

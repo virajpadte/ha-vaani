@@ -234,7 +234,15 @@ def build_device_list_text(entities: list[dict]) -> str:
         + "; ".join(parts)
         + ". In tool calls, always use these exact English names and areas. The user may "
         "say them in another language or script (e.g. Devanagari); map what they say to "
-        "the closest entry in this list."
+        "the closest entry in this list. "
+        "For a request to turn OFF all devices, or all devices of one kind, in a room or "
+        "the whole house (e.g. 'turn off all lights'), prefer one domain/area-wide turn-off "
+        "call over calling it per device, and also include switch-domain entities whose name "
+        "contains 'lamp' or 'light'. There is no equivalent all-at-once call for turning "
+        "devices ON, so for a request like 'turn on all lights' call turn-on once for every "
+        "matching device from this list (also including switch entities named lamp/light) so "
+        "none are missed. After making a change, say out loud exactly which devices were "
+        "changed - never just say it is done without naming them."
     )
 
 

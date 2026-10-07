@@ -1,10 +1,10 @@
-"""Optional web search tool exposed to assistant models.
+"""Web search tool exposed directly to the model.
 
-Unused as of the Sarvam-only rewrite: the LLM-indirected search below (asking
-OpenAI/Gemini to search on the model's behalf) was removed along with those
-providers. A direct search-API tool (Tavily) replaces this module's role in a
-follow-up change. Left in place only so nothing currently importing these
-names breaks mid-migration; nothing calls these functions anymore.
+No LLM does the searching: the model calls this tool, which hits Tavily's
+search API directly and returns a short, already-ranked answer. This is
+simpler and lower-latency than the old approach of asking a second LLM
+(OpenAI/Gemini) to run a search on the model's behalf, which was removed
+along with those providers.
 """
 
 from __future__ import annotations
@@ -14,79 +14,62 @@ from typing import TYPE_CHECKING
 
 import httpx
 from loguru import logger
-from openai import AsyncOpenAI
 from pipecat.adapters.schemas.function_schema import FunctionSchema
-
-DEFAULT_GEMINI_TEXT_MODEL = "gemini-2.5-flash"
 
 if TYPE_CHECKING:
     from pipecat.services.llm_service import FunctionCallParams
 
 
 WEB_SEARCH_TOOL_NAME = "web_search"
+TAVILY_SEARCH_URL = "https://api.tavily.com/search"
 SearchRunner = Callable[[str], Awaitable[str]]
 
 
-async def run_openai_web_search(api_key: str, model: str, query: str) -> str:
-    """Run a short OpenAI Responses web search answer."""
+async def run_tavily_search(api_key: str, query: str) -> str:
+    """Run a Tavily search and return a short, speakable answer."""
 
     query = (query or "").strip()
     if not query:
         return "No search query was provided."
 
-    client = AsyncOpenAI(api_key=api_key)
-    response = await client.responses.create(
-        model=model,
-        tools=[{"type": "web_search"}],
-        tool_choice="required",
-        input=(
-            "Answer in at most 2 short sentences suitable for being read aloud, "
-            "in the same language as the question. Do not include URLs, citations, "
-            f"or markdown. Question: {query}"
-        ),
-    )
-    return (getattr(response, "output_text", "") or "").strip() or "I could not find a useful web result."
-
-
-async def run_gemini_web_search(api_key: str, model: str, query: str) -> str:
-    """Run a short Gemini grounded Google Search answer."""
-
-    query = (query or "").strip()
-    if not query:
-        return "No search query was provided."
-
-    model_name = (model or DEFAULT_GEMINI_TEXT_MODEL).removeprefix("models/")
-    prompt = (
-        "Answer in at most 2 short sentences suitable for being read aloud, "
-        "in the same language as the question. Do not include URLs, citations, "
-        f"or markdown. Question: {query}"
-    )
     async with httpx.AsyncClient(timeout=20.0) as client:
         response = await client.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent",
-            headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
+            TAVILY_SEARCH_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
             json={
-                "contents": [{"parts": [{"text": prompt}]}],
-                "tools": [{"google_search": {}}],
+                "query": query,
+                "search_depth": "basic",
+                "include_answer": True,
+                "max_results": 3,
             },
         )
         response.raise_for_status()
     data = response.json()
-    parts = (
-        data.get("candidates", [{}])[0]
-        .get("content", {})
-        .get("parts", [])
-    )
-    text = " ".join(str(part.get("text", "")).strip() for part in parts if part.get("text"))
-    return text.strip() or "I could not find a useful web result."
+
+    answer = str(data.get("answer") or "").strip()
+    if answer:
+        return answer
+
+    results = data.get("results") if isinstance(data.get("results"), list) else []
+    snippets = [
+        str(item.get("content") or "").strip()
+        for item in results
+        if isinstance(item, dict) and item.get("content")
+    ]
+    if snippets:
+        return " ".join(snippets[:2])[:500]
+    return "I could not find a useful web result."
 
 
-def create_web_search_handler(search_runner: SearchRunner, model: str):
+def create_web_search_handler(search_runner: SearchRunner):
     """Return a Pipecat function-call handler for web search."""
 
     async def handler(params: "FunctionCallParams") -> None:
         query = str((params.arguments or {}).get("query", "")).strip()
-        logger.info("web_search called: {!r} (model={})", query, model)
+        logger.info("web_search called: {!r}", query)
         try:
             answer = await search_runner(query)
         except Exception as err:
@@ -97,7 +80,7 @@ def create_web_search_handler(search_runner: SearchRunner, model: str):
     return handler
 
 
-def web_search_schema(search_runner: SearchRunner, model: str) -> FunctionSchema:
+def web_search_schema(search_runner: SearchRunner) -> FunctionSchema:
     """Return the Pipecat function schema for web search."""
 
     return FunctionSchema(
@@ -115,5 +98,5 @@ def web_search_schema(search_runner: SearchRunner, model: str) -> FunctionSchema
             }
         },
         required=["query"],
-        handler=create_web_search_handler(search_runner, model),
+        handler=create_web_search_handler(search_runner),
     )

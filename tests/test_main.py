@@ -115,5 +115,37 @@ class BuildLlmServiceTests(unittest.TestCase):
         del llm  # constructed only to prove it accepts tools_schema without error
 
 
+class EffectiveInstructionsGenderRuleTests(unittest.TestCase):
+    def test_confirmed_female_speaker_adds_feminine_rule(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        for step in flow.steps:
+            if step.kind == "tts":
+                step.voice = "ishita"
+        instructions = main._effective_instructions(flow, "ishita")
+        self.assertIn("You are a woman", instructions)
+
+    def test_confirmed_male_speaker_adds_masculine_rule(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        instructions = main._effective_instructions(flow, "shubh")
+        self.assertIn("You are a man", instructions)
+
+    def test_unknown_speaker_adds_no_gender_rule(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        instructions = main._effective_instructions(flow, "not-a-real-voice")
+        self.assertNotIn("You are a woman", instructions)
+        self.assertNotIn("You are a man", instructions)
+
+    def test_no_voice_selected_adds_no_gender_rule(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        instructions = main._effective_instructions(flow, "")
+        self.assertNotIn("You are a woman", instructions)
+        self.assertNotIn("You are a man", instructions)
+
+    def test_build_llm_service_passes_voice_through_to_system_instruction(self):
+        config, flow = _config_with_llm_kind("sarvam")
+        llm = main._build_llm_service(config, flow, voice="ishita")
+        self.assertIn("You are a woman", llm._settings.system_instruction)
+
+
 if __name__ == "__main__":
     unittest.main()

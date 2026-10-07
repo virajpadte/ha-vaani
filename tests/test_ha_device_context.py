@@ -85,6 +85,21 @@ class BuildDeviceListTextTests(unittest.TestCase):
     def test_empty_entities_returns_empty_string(self):
         self.assertEqual(build_device_list_text([]), "")
 
+    def test_includes_domain_wide_turn_off_guidance(self):
+        text = build_device_list_text(_sample_entities())
+        self.assertIn("turn OFF all devices", text)
+        self.assertIn("domain/area-wide turn-off", text)
+
+    def test_includes_per_device_turn_on_guidance_and_switch_lamp_rule(self):
+        text = build_device_list_text(_sample_entities())
+        self.assertIn("no equivalent all-at-once call for turning", text)
+        self.assertIn("switch entities named lamp/light", text)
+        self.assertIn("switch-domain entities whose name", text)
+
+    def test_includes_confirm_what_changed_guidance(self):
+        text = build_device_list_text(_sample_entities())
+        self.assertIn("say out loud exactly which devices were", text)
+
 
 class TransliterationAndFuzzyMatchTests(unittest.TestCase):
     def setUp(self):
