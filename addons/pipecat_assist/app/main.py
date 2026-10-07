@@ -554,6 +554,30 @@ async def api_integration_models(integration_id: str, capability: str = "llm"):
     return {"ok": False, "models": fallback}
 
 
+def _voices_for_integration(integration: IntegrationConfig) -> list[dict[str, str]]:
+    """Return TTS speaker voices for an integration, grouped by gender when known."""
+
+    if integration.kind != "sarvam":
+        return []
+
+    from app.sarvam_voices import FEMALE_SPEAKERS, MALE_SPEAKERS
+
+    return [
+        {"id": name, "label": name.capitalize(), "gender": "female"} for name in sorted(FEMALE_SPEAKERS)
+    ] + [
+        {"id": name, "label": name.capitalize(), "gender": "male"} for name in sorted(MALE_SPEAKERS)
+    ]
+
+
+@app.get("/api/assist/integrations/{integration_id}/voices")
+async def api_integration_voices(integration_id: str):
+    config = STORE.load()
+    integration = config.integration(integration_id)
+    if not integration:
+        raise HTTPException(status_code=404, detail="Integration not found")
+    return {"voices": _voices_for_integration(integration)}
+
+
 @app.post("/api/assist/mcp/check")
 async def api_check_mcp(payload: dict[str, Any] | None = None):
     config = STORE.load()

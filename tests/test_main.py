@@ -147,5 +147,19 @@ class EffectiveInstructionsGenderRuleTests(unittest.TestCase):
         self.assertIn("You are a woman", llm._settings.system_instruction)
 
 
+class VoicesForIntegrationTests(unittest.TestCase):
+    def test_sarvam_voices_are_grouped_by_gender(self):
+        config, _flow = _config_with_llm_kind("sarvam")
+        voices = main._voices_for_integration(config.integration("sarvam"))
+        genders = {voice["id"]: voice["gender"] for voice in voices}
+        self.assertEqual(genders["ishita"], "female")
+        self.assertEqual(genders["shubh"], "male")
+
+    def test_non_sarvam_integration_returns_no_voices(self):
+        config, _flow = _config_with_llm_kind("local")
+        voices = main._voices_for_integration(config.integration("local"))
+        self.assertEqual(voices, [])
+
+
 if __name__ == "__main__":
     unittest.main()
