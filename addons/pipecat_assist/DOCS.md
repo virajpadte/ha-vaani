@@ -102,8 +102,9 @@ kitchen," the assistant prefers one domain/area-wide call when turning things
 **off** (Home Assistant supports this directly), falls back to one call per
 matching device when turning things **on** (Home Assistant has no built-in
 "turn everything on" intent), also matches `switch`-domain entities whose name
-contains "lamp" or "light", and confirms out loud exactly which devices
-changed.
+contains "lamp" or "light", and confirms out loud which devices changed -
+speaking each device's name naturally rather than reading the raw technical
+name (vendor/model codes and all) verbatim.
 
 ### Local models (Ollama, vLLM, LM Studio, self-hosted Sarvam)
 

@@ -98,7 +98,12 @@ class BuildDeviceListTextTests(unittest.TestCase):
 
     def test_includes_confirm_what_changed_guidance(self):
         text = build_device_list_text(_sample_entities())
-        self.assertIn("say out loud exactly which devices were", text)
+        self.assertIn("confirm out loud which device(s) changed", text)
+
+    def test_includes_speak_naturally_not_verbatim_guidance(self):
+        text = build_device_list_text(_sample_entities())
+        self.assertIn("say each device's name naturally", text)
+        self.assertIn("only in tool calls", text)
 
 
 class TransliterationAndFuzzyMatchTests(unittest.TestCase):

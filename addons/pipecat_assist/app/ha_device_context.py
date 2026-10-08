@@ -241,8 +241,12 @@ def build_device_list_text(entities: list[dict]) -> str:
         "contains 'lamp' or 'light'. There is no equivalent all-at-once call for turning "
         "devices ON, so for a request like 'turn on all lights' call turn-on once for every "
         "matching device from this list (also including switch entities named lamp/light) so "
-        "none are missed. After making a change, say out loud exactly which devices were "
-        "changed - never just say it is done without naming them."
+        "none are missed. After making a change, confirm out loud which device(s) changed - "
+        "never just say it is done without naming them. Use the exact technical name from "
+        "this list only in tool calls. When speaking to the user, say each device's name "
+        "naturally in the conversation's language instead of reading the raw technical name "
+        "verbatim - drop vendor names, model numbers, or codes (e.g. say 'Deck Lights', not "
+        "'TP-LINK_Smart Plug_036D Deck Lights')."
     )
 
 

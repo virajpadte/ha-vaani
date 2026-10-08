@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.4
+
+- Fixed the assistant reading raw technical device names verbatim when
+  confirming a change out loud (e.g. "TP-LINK_Smart Plug_036D Deck Lights"
+  spliced into Marathi speech). The exposed-device system-prompt rule now
+  separates the two uses: the exact technical name is for tool calls only;
+  when speaking to the user, the assistant refers to each device naturally
+  in the conversation's language, dropping vendor/model codes.
+
 ## 1.0.3
 
 - Stopped using the deprecated `build.yaml` (Supervisor warned: "App
